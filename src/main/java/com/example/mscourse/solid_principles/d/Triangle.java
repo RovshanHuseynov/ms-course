@@ -1,10 +1,22 @@
 package com.example.mscourse.solid_principles.d;
 
-import lombok.AllArgsConstructor;
-
-@AllArgsConstructor
 public class Triangle implements Shape{
-    private int a;
-    private int b;
-    private int c;
+    private final int a;
+    private final int b;
+    private final int c;
+
+    public Triangle(int a, int b, int c) {
+        this.a = a;
+        this.b = b;
+        this.c = c;
+    }
+
+    @Override
+    public String toString() {
+        return "Triangle{" +
+                "a=" + a +
+                ", b=" + b +
+                ", c=" + c +
+                '}';
+    }
 }
