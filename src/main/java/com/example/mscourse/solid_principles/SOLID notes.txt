@@ -1,0 +1,21 @@
+SOLID
+
+1. Single Responsibility - bir class bir işi görməlidir. Digər bir domain-ə aid bir iş görməli deyil. Həmçinin əgər Spring işlədiriksə, yəni controller, service, model classları varsa, onda o bölümlər də ayrılmalıdır, misal üçün həm biznes məntiqi, həm model strukturu hamısı eyni yerə yazmalı deyilik
+
+2. Open-Closed - dəyişikliklərə bağlıdır, yeniliklərə açıq. Open for execuation, close for modification
+misal:
+void saveToDB(Order order)
+void saveToCloud(Order order)
+void saveToFile(Order order)
+sabahısı gün təzə yerə save etməli olsaq, classa yeni method əlavə etməliyik, saveToAnywhere(Order order). bu olmaz!!!
+bunun qarşısını almaq üçün saveable adında interface götürüb onun içərisində void save(Order order) methodu yazırıq. Belə olanda istənilən qədər class həmin interface-ni implements edə bilər. İndiki halda 3 ədəd class implements edəcək (db, cloud, file), amma bu artitektur genişlənməyə açıqdır
+
+3. Liskov substitution
+superclass və subclass-larımız varsa fərqi yoxdur inheritance yoxsa polimorphizim-dir (interfeys-miz var, çoxlu class-lar onu implements edir), burda superclass-la subclass obyektlərinin yerlərini istənilən zaman dəyişə bilməliyik və kod hələ də işləməlidir - partlamamalıdır. Tam olaraq özlərini eyni aparmalıdırlar, xəta verməməlidir. Yəni bir implementation-un obyektini götürüb onun yerində başqa bir implementation-un obyektini yazsaq hər şey normal işləməlidir.
+Liskov-u pozmamaq üçün superclass-mızdakı abstract methodlarımıza xüsusi diqqət etməliyikki, istənilən subclass-miz o methodları override edəndə orda yazılan kod partlamır, yəni substitude edəndə problem yaranmayacaq. Misal üçün, həmin override etdiyimiz methodun içində throw Exception yazmaq olmaz!!! və ya hansısa subclass-da həmin override etdiyimiz methodun içində return null edirik, bu da olmaz!!!
+
+4. Interface Segregation
+bir interface-də ancaq o methodlar olmalıdır ki, onu implements edən bütün class-lara həmin method-laraehtiyac duyulur - 100% lazımdır. Əgər hər hansı bir method-a şübhəmiz varsa, onda o methodu segregate edib təzə bir interface-ə qoymalıyıq. və ya iki fərqli interfeys-də eyni adlı methodumuz varsa hər iki methodu o interfeys-lərdə silib üçüncü bir interfeys yaradıb o eyni methodu o təzə interfeys-ə qoya bilərik və digər o iki khnə interfeys-miz bu təzə interfeys-i extends edəcək.
+
+5. Dependecy Inversion (NOT injection lol !!!)
+mümkün qədər abstract-laşdırmaq. bizim asılılığımız abstraction üzərindən olmalıdır, implementation (realization) üzərindən yox. our classes should depend upon interfaces or abstract classes instead of concrete classes. Misal üçün controller class-ından service class-nı çağırmaq istəyirik, controller class-ın içində birbaşa service class-ın obyekti-ni yazıb onu çağırsaq SOLID-in D prinsipini pozmuş sayılırıq, çünki özümüzü implementation-da asılı etdik. Sabah extention edəndə məcburuq servis class-nı açıb orda kod yazaq. Amma biz onun əvəzinə controller class-ında service interface çağırırıq və service class-nı service interface-dən implements edirik, belədə sabahısı gün nəsə əlavəmiz olanda başqa bir service class-ı da yaradıb kodumuzu ora yaza bilərik və bu təzə service class-ı da həmin service interfeys-mizi implements edəcək. Yəni kodumuzu abstract-laşdırırıq. Class-lardan asılı yox, interfeys və ya abstract class-lardan asılı vəziyyətə gətiririk.
