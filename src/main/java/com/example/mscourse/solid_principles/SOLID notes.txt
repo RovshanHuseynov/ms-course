@@ -9,6 +9,8 @@ void saveToCloud(Order order)
 void saveToFile(Order order)
 sabahısı gün təzə yerə save etməli olsaq, classa yeni method əlavə etməliyik, saveToAnywhere(Order order). bu olmaz!!!
 bunun qarşısını almaq üçün saveable adında interface götürüb onun içərisində void save(Order order) methodu yazırıq. Belə olanda istənilən qədər class həmin interface-ni implements edə bilər. İndiki halda 3 ədəd class implements edəcək (db, cloud, file), amma bu artitektur genişlənməyə açıqdır
+hansı classları singleton edirik? özündə state saxlamayan classların obyektlərini. Misal üçün: mapperlər (databazakı entity-ni class obyektinə map edən classın obyetləri), və ya database connection singleton ola bilər, çünki bir dəfə yaranmağı bəs edir.
+özündə state saxlayanları singleton etmirik. Misal üçün: dto classlarını etmirik, çünki onlar hərdəfə dəyişir. Ona görə request-lərdə response-larda iştirak edən heç bir classımızı singleton eləmirik.
 
 3. Liskov substitution
 superclass və subclass-larımız varsa fərqi yoxdur inheritance yoxsa polimorphizim-dir (interfeys-miz var, çoxlu class-lar onu implements edir), burda superclass-la subclass obyektlərinin yerlərini istənilən zaman dəyişə bilməliyik və kod hələ də işləməlidir - partlamamalıdır. Tam olaraq özlərini eyni aparmalıdırlar, xəta verməməlidir. Yəni bir implementation-un obyektini götürüb onun yerində başqa bir implementation-un obyektini yazsaq hər şey normal işləməlidir.
