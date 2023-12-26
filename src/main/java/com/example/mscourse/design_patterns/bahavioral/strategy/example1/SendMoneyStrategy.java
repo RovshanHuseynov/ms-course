@@ -1,4 +1,4 @@
-package com.example.mscourse.design_patterns.bahavioral.strategy;
+package com.example.mscourse.design_patterns.bahavioral.strategy.example1;
 
 public class SendMoneyStrategy {
     private Sendible sendMoney;
