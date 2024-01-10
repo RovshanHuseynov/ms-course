@@ -1,0 +1,61 @@
+Framework bizə nə verir?
+bir sıra hazır funskionallıqlar verir, çərçivə verir, karkas verir, hansı ki, biz onunla kodumuzu asan şəkildə build edə bilirik, run edə bilirik və s
+Framework olmasa idi onda biz yenə də bunları edə biləcəkdik Framework sadəcə işimizi asanlaşdırır-compactlaşdırır, vaxta qənaət edirik.
+
+Spring Framework vs Spring Boot Framework
+1. Spring Boot-da starter-lər onu edir, maven-də və ya gradle-də yazdığımız dependency-lərin müəyyən versiyasını özü gətirir və özü start edir. Normalda startler əslində xüsusi bir şey deyil sadəcə classlardır, onu özü gətirir. Normalda bu classları biz də tapıb qoya bilərdik, sadəcə biz gələcəkdə javanın və ya mavenin (gradlenin) versiyası upgrade etmək istəsək manual şəkildə yüklədiyimz classların bir bir gərək yeni versiyasını tapıb yükləyək. birini yükləyəcəyik biri qalacaq, application run olmayacaq, konkret baş ağrısı, amma starter bunların hamısını özü edir.
+2. Spring Boot-da AutoConfiguration var. Spring-də əvvəl XML ilə bean yaranırdı, indi daha rahat yollarla, beanləri özü idarə edir. Elə ona görə AutoConfiguration deyirik.
+
+öz starter-mizi necə yarada bilərik onu araşdır
+
+Spring Boot işləmə prinsipində əsas 2 üstünlüyü var:
+1. DI - dependency injection. patterndir. composition zamanı öz işini görür. yəni bir classın içinə bir bean yazanda o bean-i ora inject edir. (classın obyekti Springdə bean adlanır)
+2. IoC - inversion of control. obyektləri bizim yaratmırıq, arxa planda özü yaradır. kod run olan kimi IoC bütün bean-ləri yaradır, yığır bir containerə, yəni new işinə baxır. Həmin bean-ləri isə inject etmək işinə DI baxır.
+
+Spring-də bean yaratmağın üsulları:
+1. annotation - ən rahatı
+2. xml - köhnə variant. Core Spring-dəki
+3. Java config (birbaşa koddan). @Configuration + @Bean annotation-ları ilə
+4. Groovy config
+
+Build tool-lar (Maven, Gradle) nə iş görür?
+1. bizim o dependecy-də yazdığımız dependecy-lərə aid olan classları gedib çəkir gətirir
+2. bizə jar faylı hazırlayıb verir. Maven-də jar fayl target qovluğuna düşür, Gradle-da build qovluğuna
+jar file classların compile olunmuş versiyasını özündə saxlayır, yəni .class faylları, yəni bytecode-ları.
+jar faylı linux-da işə salmaq üçün: java -jar ms.jar
+demək bu ms.jar faylı olmalıdırki biz həmin jar faylını linuxda, nəbilim mac-da götürək istifadə edək. Build tooları bu jar faylını yaradır.
+
+spring initializr-də spring web seçmək mandatory-dir. ən minimal bunu seçməliyik. çünki bu elə özü spring-boot-starter-dir.
+
+N-layer arxitektura
+Controller layer - requestləri-sorğuları qəbul edə bilər, validation edə bilər, sorğunu servis layerə göndərə bilər. Heç bir biznes məntiq edə bilməz !
+Service layer - bütün biznes məntiqə cavabdehdir. Bütün məntiq, hesablamalar.
+DAO - servis layer kimisə çağıranda və ya kiməsə öz obyektini ötürəndə DAO ilə çağırır
+
+@Component, @RestController, @Service, @Repository bu annotation-ların ortaq cəhəti odurki, bunların hamısınında spring (IoC) başa düşür ki, application run edəndə bu classların bean-ləri yaradılmalıdır və container-ə yığılmalıdır.
+
+@Repository annotationunu digər bu yuxarıdakı annotation-lardan bir fərqi var o nədir? - @Repository annotationı databaza ilə işləyən classlarda istifadə olunur deyə, həmin annotation-un avtomatic sqlException handling-i var. Yəni bizdə sqlExcetion çıxsa orda birbaşa partlamayacaq, spring onu özü handle eləyəcək.
+
+@RestController = @Controller + @ResponseBody. RestController o zaman istifadə olunur ki, biz istəyirik ki, classdakı methodlar özü bizə JSON formatında obyekt qaytarsın.
+
+bəs @Component annotation ilə @Service nə fərqi var? - hal-hazırda bir fərqi yoxdur. Sadəcə misal üçün spring gələcəksə təzə bir feature - xüsusiyyət çıxarmaq istəsə və istəsə ki, bu funksiyanı yalnız servis classlarına aid eləsin, onda servis classlarını digər classlardan fərqləndirmək lazım olacaq. Ona görə indidən fərqləndiriblər @Service ayrıca servis classları üçün annotation kimi qoyublar, @RestController annotation controller classları üçün, @Component isə ümumi anlayışdır bütün classlarda tətbiq oluna bilər.
+
+Autowiring - bir classın içinə (bir bean-ın) başqa bir bean-i inject etmək. Autowiring-in 3 növü var
+1. constructor based - ən recommended olanı. @Autowired sözünü yazmağa ehtiyac yoxdur.
+field-i final edib contructorda field-ə dəyər mənimsətmək
+2. setter based - @Autowired sözünü setter-dən əvvəl yazırıq. Springdə təzə versiyalarda @Autowired sözünü yazmağa ehtiyac yoxdur. - bu üsul da normaldır problem yoxdur sadəcə class-ın bean-ni (classın obyektini) elə contructor-la yarada bilirikdə, niyə bir artıq layer istifadə edib setter layer-də yaradaq. Bunu ancaq o zaman istifadə edə bilərik ki, hər hansı bir səbəbdən bean-ni (classın obyektini) constructor-da yarada bilmirik, onda setter outowired istifadə edirik.
+3. field based = ən pis olanı. @Autowired sözünü field-dən əvvəl yazırıq. mənfi cəhətləri: 1. final keyword istifadə edə bilmirik. immutibility qoyura bilmirik. bu bizə multi thread-də problem yaradacaq. biz final qoyub əmin olmaq istəyirik ki, 15 ədəd də thread gəlsə o datanı final olduğuna görə dəyişə bilməyəcək. 2. testing. testing zamanı hanısasa bir xırda scopu-methodu test etmək istəyəcəyik, amma bütün application-un full contexti ayağa qalxacaq hansı ki bu bizə lazım deyil, unit testing adından da göründüyü kimi hansısa xırda bir hissəni test etmək üçündür. Misal üçün class-dakı yalnız 1 methodu test etmək istəyirik, yox bütün context ayağa qalxacaq.
+
+@SpringBootApplication = @SpringBootConfiguration + @EnableAutoConfiguration + @ComponentScan
+
+@ComponentScan - Biz kodu run edəndə adından da göründüyü kimi paketləri scan edir, bean classlarını tapır və IoC-yə ötürür ki beanləri yaratsın, container-ə yığsın və s. Əsəs biz əsas classın (yəni @SpringBootApplication annotation olan classın) pathını dəyişib tutaq ki, service package-sin içinə qoysan onda yalnız service package-sin içini scan edəcək, yalnız o package-də olan bean-lər yaranmış olacaq.
+həmçinin biz @ComponentScan içərisinda exclude, include yazıb bəzi package-ləri scandan çıxara və ya əlavə edə bilərik
+
+bean scope
+1. Singleton - default. bir class-ın bean-i yalnız bir dəfə yaradılır və hər dəfə o class-a müraciət edəndə həmin bean-i istifadə edirik
+2. Prototype - class-ın obyektini-beanin hər dəfə çağıranda - istifadə edəndə yeni bean yaradır
+3. Request - hər HTTP request üçün yeni bean yaranır. Misal üçün adətən controller classı servisi çağırır, hər HTTP request-də controller class-ı servisi çağırır və yeni bean çağıracaq. Bu adətən sensitive data-lar üçün istifadə olunur ki, təhlükəsizlik üçün yeni bean yaratsın köhnə bean-i istifadə etməsin
+4. Session - sesiyalar-da işləyən applarda aktual idi, indi yeni applar üçün deprecated sayılır, yeni applar heç biri sesiya ilə işləmir. yeni applar security yərəfdən baxsan JWT əsasında işləyir
+5. GlobalSession - eyni. deprecated
+6. WebSocket - hər WebSocket connection-u üçün yeni bean yaranır
+7. Application - eyni. deprecated. bu da odurki hər application qalxanda yeni bean-lər yaratsın

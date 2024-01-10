@@ -1,0 +1,122 @@
+HTTP vs HTTPS - secure
+
+HTTP protokoldur. data daşımaq üçün
+
+mikroservislər daxili yaxşı olar ki, HTTP ilə danışın, amma çöldən gələn və ya gedən sorğular üçün HTTPS işlətmək daha yaxşıdır, çünki HTTPS zamanı hərdəfə serkifikatın olub olmamasını yoxlayır (certificate check), bu da əlavə olaraq şəbəkəni yorur. Çünki mikroservis daxili onsuzda biz eyni kubernetes cluster-dayıq, HTTPS işlədib şəbəkəni yormağa ehtiyac yoxdur.
+
+HTTP request start line -
+1. method - GET, POST etc
+2. Path - /v1/users etc
+3. version - HTTP/1.1 (REST), HTTP/2.0 (binary like RPC, GRPC), HTTP/3.0 (Blockchain)
+4. headers
+
+
+HTTP response start line -
+1. status code - 200 etc
+2. status message - OK etc
+2. Path - /v1/users etc
+3. version - HTTP/1.1 (REST), HTTP/2.0 (binary like RPC, GRPC), HTTP/3.0 (Blockchain)
+4. headers
+
+1. API - application programming interface.  bir növ interfeysdir, bir növ dokumentasiyadır ki, siz bunu kiməsə təqdim edirsinizki, mənim yazdığım kod bu şəkildə çağırılmalıdır. url verirsiniz, sonra request header budur, request body budur, response body belə gələcək, bir bir hamısını izah edirsiniz.
+2. Restful webservice - JAVA base baxsaq API bizdə bir növ interface idisə, bu Restful webservice bir növ implementationdur, classlardır, realizasiyamızdir. Yəni əsas işi görən hissədir.
+3. REST - representational state transfer. arxitektural stildir. bir yerdən bir yerə sorğu atmaq - transfer etmək üçün. Rest Stateless-dir. Yəni özündə state saxlamır. Request gəlir, response qayıdır və vsyo bitdi. ondan sonra ikinci request gəlir, response qayıdır və vsyo bitti. yəni bunlar bir birindən asılı deyil. aralarında state yoxdur.
+4. Endpoint - bu sadəcə path-ın bir hissəsidir, yəni URL-in.
+
+HTTP methods
+1. GET - retrieve data
+2. POST - create data
+3. PUT - update all fields
+4. DELETE - delete zamanı çalışın soft delete edin, hard delete yox. yəni sadəcə status = DELETED edin databazada, birbaşa sətri silmək əvəzinə
+5. PATCH - update one or some fields
+6. HEAD - same as GET, but No response body, only headers. Metadata-nı çəkmək istəyəndə
+7. OPTIONS - birinci bunu göndərib bir növ yoxlayırıq görək işləyirmi yoxsa yox (IP-ni port-u yoxlayırıq düzdürmü), ondan sonra lazım olanı göndəririk, misal üçün GET requestimizi
+
+
+v1/users POST. data send via request body. create user
+v1/users/1 GET    {id} - Path Variable
+v1/users/{id}/orders/{orderId}    Path Variable several variables
+v1/users/1/orders/2
+v1/users GET   - burda gec işləməsin deyə pagination və ya filtering aparılmalıdır, əks halda select * from fulltable kimi olur deyə böyük cədvəllərdə bu gec işləyə bilər
+Path Variable-da adətən id-lər olur, başqa şeylər olmur. url-də additional və ya optional parametr varsa o parametrləri Path Variable kimi ötürə bilmərik Request Param kimi ötürməliyik
+v1/users?page=0&count=10&status=ACTIVE  GET ? ----> request param (query param)
+GET-də request body göndərmək mümkündür amma bad practise sayılır. mümkün qədər request param işlətməliyik
+yegəanə olaraq 1 halda bir request param işlədə bilmirik, məcburuq request body işlədək, o hal da ki url-in uzunluğu maksimum 2048 simvol ola bilər, (max url size = 2048 characters) əgər bizim request param-ın 2048 simvolda çox olma ehtimalı varsa onda request body işlətməyə məcburuq. Bu hal da adətən request paramda LIST göndərmək istəyəndə baş verə bilər.
+request param list example - v1/payments?transactionIds=123344&transactionIds=12121231&transactionIds=131231231
+əgər url-də 2048 simvolu aşsaq bizim requestimizə cavab olacaraq 413 reqsonse kodu qayıdacaq
+v1/users/1 {"name" : "John"} PUT - update all fields
+PUT-da bir növ həm path variable, həm də request body işlətmiş oluruq. PUT-da məsləhətdir ki, id-ni path variable kimi, digər fieldləri isə request body kimi göndərək.
+/v1/users/1?name=John PATCH update only 1 row
+bir də istisna hal kimi nə zaman datanı request paramda göndərmək olmur (yəni məcbur request body işlətməli oluruq) bizim input datamızda bəzi characterlər ola bilər ki, HTTP bu characterləri avtomatic olaraq dəyişir, misal üçün boşluğu %20-yə dəyişir, nəbilim $,& işarələrini də deyəsən dəyişir (internetdən full siyahıya bax!!!), bu tipli inputunuz varsa onda məcbur request body işlətməliyik.
+
+
+URL-də bir neçə söz olanda camelCase, snake_case qoymaq olmaz!!! kabab-case qoymalıyıq və bütün hərflər kiçik hərf olmalıdır
+misal üçün: /v1/cardSalary olmaz!!!
+            /v1/card_Salary olmaz!!!
+			/v1/card-salary olar
+
+
+HTTP methods safe or idempotent
+idempotent-lik odurki, hər eyni request üçün həmişə eyni response gəlir. daha dəqiq desək eyni request həmişə eyni işi görür. və eyni işi gördüyünə görə yəni biz o requesti 1 dəfə çağıranda istədiyimiz nəticəni almış oluruq, 10 dəfə çağırsaq belə elə o ilk nəticənin eynisi gələcək
+all safe methods are also idempotent, but not all idempotent methods are not safe
+safe request - heç vaxt date change etmir, does not alter state (misal üçün get request)
+idempotent - data change edir, amma eyni request üçün yalnız 1 dəfə. 10 dəfə çağırsan yalnız 1-ci dəfə change edəcək (misal üçün put və delete methodları)
+heç biri - (misal üçün post methodları)
+POST niyə idempotent deyil? - post heç vaxt idempotent ola bilməz çünk post misal üçün user create edir - user yaradır. 10 dəfə çağırsaq 10 dəfə user yaradacaq.
+PATCH niyə idempotent deyil? - misal üçün bizdə bir API var change directory from A to B. bu API 1 faylın yerini A-dan B-yə dəyişir. İndi bu method 1 dəfə işləyəndə A folderindəki faylı B folderinə dəyişəcək. Amma methodu 2-ci dəfə çağıranda o sorğu heç bir iş görməyəcək, çünki artıq fayl A folderində deyil, B folderindədir. yəni o methodu 10 dəfə çağıranda 1-ci dəfə başqa iş görür, digər 9-da başqa iş. Ona görə PATCH idempotent deyil.
+
+idempotency key haqqında araşdır.
+sorğunun idempotent olması üçün front 1 ədəd id generasiya edir, sonra back-a onu göndərir ki, idempotentlik qoruna bilsin.
+
+HTTP METHOD   -  SAFE   -  IDEMPOTENT
+GET           -  YES    -   YES
+HEAD          -  YES    -   YES
+OPTIONS       -  YES    -   YES
+TRACE         -  YES    -   YES
+PUT           -  NO     -   YES
+DELETE        -  NO     -   YES
+POST          -  NO     -   NO
+PATCH         -  NO     -   NO
+
+
+HTTP response codes
+Informational responses (100 – 199)
+Successful responses (200 – 299)
+201 - CREATED. POST methodu zamanı yeni domain yarandısa
+202 - ACCEPTED. asynchronous sorğular zamanı. Sorğu göndərən tərəfə deyirikki, sorğu qəbul olundu, amma sorğunuz sonra emal olunacaq.
+204 - NO Content. javada void methodları. cavabda heç nə qaytarmayanda. Response Body olmayanda
+208 - ALREADY REPORTED - eyni sorğu təkrar gəlibsə bunu göndərə bilərik
+Redirection messages (300 – 399)
+301 - MOVED PERMAMENTLY. path dəyişib. bunu qaytaranda response-də yeni path-ı göndəririk ki, dəyişib və bura dəyişib.
+307 - TEMPORARY REDIRECT
+Client error responses (400 – 499)
+400 - BAD REQUEST. validation issues
+401 - UNAUTHORIZED. authentication xətası. misal üçün: token düz gəlməyəndə. token vaxtı bitib, sessiya vaxt bitib. authentication problems. user şifrəsini səhv yazıbsa
+402 - PAYMENT REQUIRED. ödənişin vaxtı bitibsə
+403 - FORBIDDEN. authorization problems. permission problems. access problems
+404 - NOT FOUND. url səhv olanda. user yoxdursa. yəni nəsə tapılmadısa
+405 - METHOD NOT ALLOWED. misal üçün POST lazım olan yerdə GET göndərmisənsə və elə bir şey mövcud deyilsə
+406 - NOT ACCEPTABLE. nəyəsə görə sorğunu accept edə bilmirik. misal üçün tokeninizin vaxtı bitməyib, amma ən sonuncu deyil
+407 - PROXY AUTHENTICATION REQUIRED. misal üçün səni birbaşa sistemə buraxmaq istəmir, səni proxy üzərindən sistemə buraxmaq istəyir
+408 - REQUEST TIMEOUT. default timeout 30 saniyə olur
+409 - CONFLICT. hansısa bir səbəbə görə konflikt verir
+413 - PAYLOAD TOO LARGE - misal üçün APİ fayl qəbul edir, amma yalnız 1 MB yaddaşa qədər fayl göndərilməlidir. Əgər ondan çox göndərilirsə bu response kodu verə bilərik
+414 - URI TOO LONG - misal üçün URL 2048 simvoldan çoxdursa bu response kodu verə bilərik
+429 - TOO MANY REQUESTS - "rate limiting" - API-ya limit qoyursanki misal üçün 1 dəqiqə ərzində 1 IP-dən 10 sorğu gələ bilsin. 11-cidə bu response kodu verə bilərik
+Server error responses (500 – 599)
+500 - Internal Server Error - daxili hər hansı bir xəta var
+502 - BAD GATEWAY - adətən devops, connection xətaları
+503 - SERVICE UNAVAILABLE - hansısa bir servis işləmir. Misal üçün ms-lərdən biri çöküb
+504 - GATEWAY TIMEOUT - standart 30 saniyədir. Front-la danışıb onu aşağı endirmək məsləhətdir, 10 saniyə filan. 30 saniyə çox gecdir indiki zamanda. Bizim 30 saniyəyə icra olunan APİ varsa çox pisdir, birbaşa performans issue-ya gətirib çıxarır. Özü də bu 30 saniyə user sorğunu göndərən zamandan başlayır (user klik edəndən sonra). Yəni userin sorğusu load balanserdə ilişib qalsa belə həmin 30 saniyə başlamış olur
+
+
+1. @RequestParam String name yazanda name - burda name default olaraq required=true-dur (obligatory). Yəni APİ çağırılanda name parameter kimi ötürülməsə MissingServletRequestParameterException xətası verəcək
+2. @RequestParam(required = false) String name - obligatory olmasın deyə required = false yazmalıyıq
+3. həmçinin heç @RequestParam yazmayıb, elə birbaşa kodda String name yaza da bilərik. Onda da @RequestParam kimi başa düşür, çünki default odur, amma yazmayanda @RequestParam(required = false) kimi başa düşür, required olmur
+4. çoxlu sayda parametr varsa yaxşı olar ki, onu tək tək vergüllə kodda yazmaq yox, onları ilk öncə classa çıxarıb, sonra classın obyektini 1 parametr kimi göndərmək yaxşıdır. Yəni:
+@RequestParam String name,
+@RequestParam String surname
+@RequestParam String fathername
+@RequestParam String adress
+belə yaxşı deyil
+classda da field-lər required məsələsini field-lərin üzərinə @NotNull, @NotBlank yaza bilərik
