@@ -1,3 +1,14 @@
+Integer a = 4;
+Integer b = 4;
+System.out.println(a == b); // true
+
+Integer a = 128;
+Integer b = 128;
+System.out.println(a == b); // false
+
+
+between -128 to 127 they are true, then they are false. byte-ın tutduğu yer ən kiçikdir, bu o deməkdir byte-ın tutduğu yer digər hamısını tutduğu yerə girib yerləşə bilər. short-da yerləşə bilər, int-ə də, long-a da. Hamısına yerləşə bilir deyə, onu keşləyə bilir, daha böyük rəqəmləri isə keşləmir ki, onlar sonra misal üçün byte-a short-a yerləşməyə bilər
+
 failSafe()
 failFast()
 iteratorlarn fərqi

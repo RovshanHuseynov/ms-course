@@ -27,9 +27,11 @@ Code inspections
 Refactoring actions (lombok and delombok)
 
 
+Lombokun mənfi cəhəti nədir?
+@Data annotation entity classlarında performans issue yarada bilər
 @Data - bu annotationu entity class-larda yazmırıq. Ciddi performans issue gətirib çıxarır, çünki Equals və HashCode-u bütün field-lər üzrə edir, orda lazy-eager fetching məsələləri işə düşür, n+1 problemi yaranır. Çoxlu sorğular gələndə gedib həmişə bütün field-ləri fetch eləməyə çalışır və gec işləyir. Ona görə Entity class-larında biz Equals və HashCode-u yalnız 1 field üzrə override etməliyik. Primary key olan field üzrə (adətən id üzrə). Ona görə entity classlarında bunu edirik ki, entity classları databaza ilə işləyir, yəni gedib databazadan məlumat çəkəndə ləngiməyə düşür. Əgər databaza ilə işləyən başqa class-lar varsa onlarda da Equals və HashCode-u yalnız 1 field üzrə override etməliyik
 DTO class-larında isə avtomatik @Data yazırıq
 
-@SneakyThrows - CheckedException-ları fonda try catch-la alıb RunTimeException-lara convert edir onu throw edir. Biz harda throws yazırıqsa onu silib methodun başına @SneakyThrows yazsaq daha yaxşı olar
+@SneakyThrows - CheckedException-ları fonda try catch-la alıb UncheckedException-lara (RunTimeException-lara) dəyişir onu throw edir. Biz harda throws yazırıqsa onu silib methodun başına @SneakyThrows yazsaq daha yaxşı olar. Çünki spring-də bəzi annotationlar var onlar yalnız RunTimeException ilə işləyir. Misal üçün ən çox işlətdiyimiz @Transactional annotation yalnız RunTimeException ilə işləyir, yəni bizim kodda CheckedException partlasa onda @Transactional işləməyəcək, rollback olmayacaq.
 
 @UtilityClass - class constant halına gətirir. Yəni class-ın constructorunu private edir, fieldlərə və methodlara static keyword əlavə edir

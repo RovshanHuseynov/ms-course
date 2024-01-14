@@ -1,13 +1,13 @@
 package com.example.mscourse.REST.model;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class Employee {
-    private final long id;
-    private final String name;
+    private long id;
+    private String name;
 }
