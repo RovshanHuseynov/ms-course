@@ -19,6 +19,13 @@ map yox ConcurrentHashMap. bunlar multi thread mühittə listlərlə və ya mapl
 Java 8 gəlməmişdən öncə (yəni lambda gəlməmişdən öncə) functional interface-lər Java-ne nə vasitəsilə istifadə olunurdu? cavab: anynom class-lar vasitəsilə
 lambda expression-a int a ötürə bilmirik, orda immutibility məsələsi var, lambda expression-a effectively final variable göndərə bilirik. bunun məqsədi variable-ı sadəcə bir dəfə istifadə etmək üçündür. int ona görə göndərə bilmirikki, int final deyil.
 
+java 8-dən sonra bucket red black tree-dir linkedlist yox, amma size > 8 olandan sonra red black tree-yə çevrilir, size = 8-ə kimi linkedlist olmağa davam edir
+red black tree-də axtarış O(log(n))-dir deyəsən binary search-lər işləyir
+sonra load factor default olaraq 75%-dir, onu aşandan sonra bucket size 2 dəfə artır (default = 16)
+sual? mapdakı elementləri silsək onda bucket size azalırmı? cavab: xeyr
+
+hashların eyni olmasına termin olaraq kolleziya deyilir.
+
 final vs effectively final
 final-da variable qarşısına final yazırıq və bilirik ki, dəyər-value heç vaxt dəyişməyəcək
 effectively final-da isə variable qarşısına final yazmırıq, amma dəyəri bir dəfə yazırıq və heç vaxt dəyişmir
@@ -60,3 +67,12 @@ bir class-ı immutable etmək üçün nə etmək lazımdır?
 constructoru private harda etmək olar?
 1. singleton class-larda
 2. constant class-larda. yalnız field-lər olur onlarda da public static final olur. Class-ın obyektini yaratmağa ehtiyac olmur
+
+try with resources - exception handling zamanı istifadə olunur. finally block-unu avtomatik özü icra edir, amma yalnız AutoClonable interface-sini implements edən resursdursa onda try with resources istifadə edə bilirik.
+
+Thread yaratmağın hansı üsulları var?
+Runnable var
+Callable var
+Runnable ilə Callable nə fərqi var? qaytardığı tipdə fərqi var
+Runnable yalnız void methodu var
+Callable isə threadi buraxandan sonra izləmək olur, axırı nə oldu bilmək olur

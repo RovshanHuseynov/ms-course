@@ -1,0 +1,109 @@
+Araşdırma
+
+JIC - just in time compiler
+
+
+read about: Iterator vs ListIterator
+
+-amend commit / force push / fixup / rebase
+
+Iterator
+Fail safe and fail fast iterators
+
+HTTP methods
+REST
+API,WEBSERVICE
+Correct api design
+Path variable
+Request Param(query param)
+Kabab-case
+Secure Remote Password protocol
+
+Idempotency
+Status codes
+REST NAMING conventions
+
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+https://restfulapi.net/resource-naming/
+https://www.partech.nl/en/publications/2023/01/best-practices-for-naming-rest-api-endpoints
+
+
+PECS principle producer extend cunsumer
+JMM - Java memory model/modul
+Binary Search
+Select for update
+
+Agregat functions
+Joins
+Sequences
+Index(bi tree algoturm)
+
+ACID principles
+Transaction isolation layers and problems
+
+DB version control – liquibase
+
+
+tracing
+Tranzaksiya nedir?
+
+ACID principler
+Transaction isolation level
+
+Executer Poll-lar
+- single
+- fixed
+- scheduled
+
+JVM nədir? JRE, JDK nədir?
+Javada neçə dənə memory area var?
+class area, native method stack, pc register nədir? class method area nə üçün istifadə olunur?
+hansı per thread-dir (stack), hansı bütün threadlər üçün eynidir - globaldır? (heap)
+GIT compiler
+threadlərdə visibility problem nədir?
+thread locking-də fairness anlayışı nədir?
+reterrant vs read write lock
+fork join pool necə işləyir?
+spring pool niyə heap-ə gəldi? nə vaxt gəldi? Java neçədən sonra?
+threadlər? executer service nədir? onu neçə cür yaratmaq olar? fixed vs cached
+semafora nədir? mutex nədir?
+race condition nədir? hansı case-də yaşana bilər? nümunə gətir?
+double check locking nədir?
+java referances: soft, strong and etc. use cases of them/ real implementation
+misal üçün javada yaratdığımız obyektlər strong referancesdir
+niyə String class-ı immutabledir?
+runtime polimorphizim compile time polimorphizim nədir?
+dynamic binding static binding nədir?
+singleton patterni necə violite eləmək olar? (4-5 yolu var deyəsən)
+reflection ilə violite eləmək olar?
+singletonu static holder pattern ilə necə yazmaq olar?
+lazy initializaion vs eager initializaion
+lazy initializaion exception nə zaman baş verir və necə resolve etmək olar?
+stream-lər grouping by
+misal üçün sözdə-cümlədə hər hərfdən neçə ədəddir onu tapmaq
+ABB tech-də belə warm uplar çox edirdik onları tap bir də et
+checkhed exception vs unchecked exception
+stereo type annotasiyaları hansılardır?
+@Repository yazmayanda da necə olur ki işləyir?
+entity life cycle-lər: transient, detached, managed
+@Transactional annotation olan method niyə private ola bilməz? orda hansı access modifier-lər olar bilər?
+proxy məsələsinə görə
+@Configuration class final ola bilər? yox. niyə?
+@Configuration class içərisində bean-lər yaratmışam, bu methodlar private ola bilər?
+proxy məsələsinə görə
+Transactional propogation
+for example I have a server, and my server accepts 100 requests per second. But my client sends me more than 100 requests per second and my server gets down. I cannot tell my client not to send more than 100 requests. How can I set limit for requests in my side?
+databasa indexləri hansı data structure ilə işləyir?
+hansı halda index qoymağımız mənasız olur?
+composite index vs index?
+spring bean factory vs application context
+dbms concurrency control - dirty read, non repeateble read, famton read
+isolation level - read uncommitted, serializable
+normalization levels
+optimist log vs pessimist log
+clustered index vs non clustered index
+system design patterns - blue green deployment pattern nə zaman istifadə olunur
+avl tree vs red black tree fərqi
+network - farewall nədir?
+farewall varsa spring security istifadə etmək lazımdırmı?
+dns nədir? dns lookup nədir? necə işləyir?

@@ -105,6 +105,7 @@ Client error responses (400 – 499)
 429 - TOO MANY REQUESTS - "rate limiting" - API-ya limit qoyursanki misal üçün 1 dəqiqə ərzində 1 IP-dən 10 sorğu gələ bilsin. 11-cidə bu response kodu verə bilərik
 Server error responses (500 – 599)
 500 - Internal Server Error - daxili hər hansı bir xəta var
+501 - NOT IMPLEMENTED - The server either does not recognize the request method, or it lacks the ability to fulfil the request
 502 - BAD GATEWAY - adətən devops, connection xətaları
 503 - SERVICE UNAVAILABLE - hansısa bir servis işləmir. Misal üçün ms-lərdən biri çöküb
 504 - GATEWAY TIMEOUT - standart 30 saniyədir. Front-la danışıb onu aşağı endirmək məsləhətdir, 10 saniyə filan. 30 saniyə çox gecdir indiki zamanda. Bizim 30 saniyəyə icra olunan APİ varsa çox pisdir, birbaşa performans issue-ya gətirib çıxarır. Özü də bu 30 saniyə user sorğunu göndərən zamandan başlayır (user klik edəndən sonra). Yəni userin sorğusu load balanserdə ilişib qalsa belə həmin 30 saniyə başlamış olur
