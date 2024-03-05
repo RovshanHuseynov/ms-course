@@ -4,9 +4,9 @@ HTTP protokoldur. data daşımaq üçün
 
 mikroservislər daxili yaxşı olar ki, HTTP ilə danışın, amma çöldən gələn və ya gedən sorğular üçün HTTPS işlətmək daha yaxşıdır, çünki HTTPS zamanı hərdəfə serkifikatın olub olmamasını yoxlayır (certificate check), bu da əlavə olaraq şəbəkəni yorur. Çünki mikroservis daxili onsuzda biz eyni kubernetes cluster-dayıq, HTTPS işlədib şəbəkəni yormağa ehtiyac yoxdur.
 
-HTTP request start line -
+HTTP request start line - 
 1. method - GET, POST etc
-2. Path - /v1/users etc
+2. path/url - /v1/users etc
 3. version - HTTP/1.1 (REST), HTTP/2.0 (binary like RPC, GRPC), HTTP/3.0 (Blockchain)
 4. headers
 
@@ -14,7 +14,7 @@ HTTP request start line -
 HTTP response start line -
 1. status code - 200 etc
 2. status message - OK etc
-2. Path - /v1/users etc
+2. path/url - /v1/users etc
 3. version - HTTP/1.1 (REST), HTTP/2.0 (binary like RPC, GRPC), HTTP/3.0 (Blockchain)
 4. headers
 
@@ -32,6 +32,8 @@ HTTP methods
 6. HEAD - same as GET, but No response body, only headers. Metadata-nı çəkmək istəyəndə
 7. OPTIONS - birinci bunu göndərib bir növ yoxlayırıq görək işləyirmi yoxsa yox (IP-ni port-u yoxlayırıq düzdürmü), ondan sonra lazım olanı göndəririk, misal üçün GET requestimizi
 
+Nə zaman request body işlədirik nə zaman yox?
+POST və PUT-da default olaraq request body işlədirik, digərlərində isə yalnız məcbur qalanda, misal üçün GET və PATCH-da url 2048 simvol həddini keçmək ehtimalı varsa
 
 v1/users POST. data send via request body. create user
 v1/users/1 GET    {id} - Path Variable
@@ -54,8 +56,8 @@ URL-də bir neçə söz olanda camelCase, snake_case qoymaq olmaz!!! kabab-case 
 misal üçün: /v1/cardSalary olmaz!!!
             /v1/card_Salary olmaz!!!
 			/v1/card-salary olar
-
-
+			
+			
 HTTP methods safe or idempotent
 idempotent-lik odurki, hər eyni request üçün həmişə eyni response gəlir. daha dəqiq desək eyni request həmişə eyni işi görür. və eyni işi gördüyünə görə yəni biz o requesti 1 dəfə çağıranda istədiyimiz nəticəni almış oluruq, 10 dəfə çağırsaq belə elə o ilk nəticənin eynisi gələcək
 all safe methods are also idempotent, but not all idempotent methods are not safe
@@ -84,7 +86,7 @@ Informational responses (100 – 199)
 Successful responses (200 – 299)
 201 - CREATED. POST methodu zamanı yeni domain yarandısa
 202 - ACCEPTED. asynchronous sorğular zamanı. Sorğu göndərən tərəfə deyirikki, sorğu qəbul olundu, amma sorğunuz sonra emal olunacaq.
-204 - NO Content. javada void methodları. cavabda heç nə qaytarmayanda. Response Body olmayanda
+204 - NO_CONTENT. javada void methodları. cavabda heç nə qaytarmayanda. Response Body olmayanda
 208 - ALREADY REPORTED - eyni sorğu təkrar gəlibsə bunu göndərə bilərik
 Redirection messages (300 – 399)
 301 - MOVED PERMAMENTLY. path dəyişib. bunu qaytaranda response-də yeni path-ı göndəririk ki, dəyişib və bura dəyişib.
@@ -100,7 +102,7 @@ Client error responses (400 – 499)
 407 - PROXY AUTHENTICATION REQUIRED. misal üçün səni birbaşa sistemə buraxmaq istəmir, səni proxy üzərindən sistemə buraxmaq istəyir
 408 - REQUEST TIMEOUT. default timeout 30 saniyə olur
 409 - CONFLICT. hansısa bir səbəbə görə konflikt verir
-413 - PAYLOAD TOO LARGE - misal üçün APİ fayl qəbul edir, amma yalnız 1 MB yaddaşa qədər fayl göndərilməlidir. Əgər ondan çox göndərilirsə bu response kodu verə bilərik
+413 - PAYLOAD TOO LARGE - misal üçün API fayl qəbul edir, amma yalnız 1 MB yaddaşa qədər fayl göndərilməlidir. Əgər ondan çox göndərilirsə bu response kodu verə bilərik
 414 - URI TOO LONG - misal üçün URL 2048 simvoldan çoxdursa bu response kodu verə bilərik
 429 - TOO MANY REQUESTS - "rate limiting" - API-ya limit qoyursanki misal üçün 1 dəqiqə ərzində 1 IP-dən 10 sorğu gələ bilsin. 11-cidə bu response kodu verə bilərik
 Server error responses (500 – 599)

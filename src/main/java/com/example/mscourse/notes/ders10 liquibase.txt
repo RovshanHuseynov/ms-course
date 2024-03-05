@@ -1,0 +1,32 @@
+Liquibase (alternativi Flyway)
+
+
+database version control
+Elə fikirləşmək olar ki, Liquibase databazanın GIT-dir. Kodda GIT, databazada Liquibase
+DB version control – liquibase
+
+Liquibase qoşmaq üçün
+1. gradle-da Liquibase dependency
+2. changelog-master.yml fayl yaradıb, onun içində liquibase sql scriptlərimizin folder path-nı göstəririk
+3. changelog-master.yml faylını application.yml-a əlavə edirik
+
+Liquibase üstünlükləri
+1. bütün scriptilər burdadır görmək olur, history-ni saxlamaq üçün
+2. localda databaza qaldırmaq üçün bütün scriptilər əlimizdədir və bütün mühitlərdə eyni scriptlər run olacaq, yəni prodda başqa cədvəl, başqa index, başqa sütun, masterdə başqa şeylər olmayacaq və əyri üyrü updatelər, manual scriptlər yazılmayacaq. Hamı eyni databaza ilə işləyəcək
+3. script əlavə edəndə review zamanı yoxlayan olur daha təhlükəsiz olur
+4. databazanı nəyəsə miqrasiya etmək istəsək, dəyişmək istəsək rahatdır, çünki bütün scriptilər əlimizdədir
+
+kodu ilk dəfə run edəndə bütün Liquibase faylları bir bir oxunur, faylların içindəki script icra edilir, faylların hashları çıxarılır və databasa_change_log cədvəlinə faylın adı və hash-ı insert edilir, beləliklə bu fallar marked olunmuş olur bir növ. Sonra kodu təkrar run edəndə bütün Liquibase faylları yenə də bir bir oxunur, onların hash-ı çağırılır, existed faylların içərisindəki script icra edilmir, sadəcə hash-ların eyniliyi yoxlanılır, əgər faylda dəyişiklik etmişiksə təzə hash-la db cədvəldəki hash uyğun gəlmir və app ayağa qalxmır. Yeni faylların isə içərisindəki script icra edilir, həmçinin hash-ları db cədvələ yazılır və bu fayllar da marked olunmuş olur.
+
+Liquibase version control üçün 2 cədvəl yaranır:
+databasechangelog - bura sırf Liquibase faylları, onun hashları və s yazılır
+databasechangeloglock - bura isə kodu run edəndə bir bir Liquibase faylları run edir ha, onda Liquibase fayllarında istifadə olunan cədvəlləri lock-a salır, yəni acquire lock edir, yəni locked=true edir, işini bitirən kimi lock-lamanı release edir, yəni locked=false edir. bu acquire, release məsələlərini kodu run edəndə log-da görmək olur.
+
+
+-- DDL - Data Definition Language - CREATE, ALTER, DROP, TRUNCATE, COMMENT, RENAME
+-- DML - Data Manipulation Language - INSERT, UPDATE, DELETE
+-- DQL - Data Query Language - SELECT
+-- DCL - Data Control Language (GRANT, REVOKE). Grant hansısa userə access vermək, Revoke həmin accessi silmək
+-- TCL - Transaction Control Language - COMMIT, ROLLBACK, SAVEPOINT
+
+savepoint odurki scriptin hansısa bir hissəsində savepoint "name" qoyuruq, sonra rollback to "name" yazırıq, onda rollback to "name" yazılan yerdən o savepoint olan hissəyə qədər rollback edir, ondan yuxarını rollback etmir
