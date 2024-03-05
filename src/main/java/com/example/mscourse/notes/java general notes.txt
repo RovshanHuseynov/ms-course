@@ -1,0 +1,179 @@
+Integer a = 4;
+Integer b = 4;
+System.out.println(a == b); // true
+
+Integer a = 128;
+Integer b = 128;
+System.out.println(a == b); // false
+
+
+between -128 to 127 they are true, then they are false. byte-ın tutduğu yer ən kiçikdir, bu o deməkdir byte-ın tutduğu yer digər hamısını tutduğu yerə girib yerləşə bilər. short-da yerləşə bilər, int-ə də, long-a da. Hamısına yerləşə bilir deyə, onu keşləyə bilir, daha böyük rəqəmləri isə keşləmir ki, onlar sonra misal üçün byte-a short-a yerləşməyə bilər
+
+Gradle vs Maven
+1. Gradle bir az daha sürətli işləyir. Dependency-ləri daha tez gətirir (təbii ki internetin sürəti də burda önəmli faktordur)
+2. Gradle-da öz scriptlərimizi yazmaq olur
+
+failSafe()
+failFast()
+iteratorlarn fərqi
+MultiThread collections
+misal üçün ArrayList() yox CopyOnWriteArrayList() - bu sağdakını işlədəndə bizim iterator artıq failSafe olmuş olur
+map yox ConcurrentHashMap. bunlar multi thread mühittə listlərlə və ya maplarla işləmək üçündür
+
+Java 8 gəlməmişdən öncə (yəni lambda gəlməmişdən öncə) functional interface-lər Java-ne nə vasitəsilə istifadə olunurdu? cavab: anynom class-lar vasitəsilə 
+lambda expression-a int a ötürə bilmirik, orda immutibility məsələsi var, lambda expression-a effectively final variable göndərə bilirik. bunun məqsədi variable-ı sadəcə bir dəfə istifadə etmək üçündür. int ona görə göndərə bilmirikki, int final deyil.
+
+java 8-dən sonra bucket red black tree-dir linkedlist yox, amma size > 8 olandan sonra red black tree-yə çevrilir, size = 8-ə kimi linkedlist olmağa davam edir
+red black tree-də axtarış O(log(n))-dir deyəsən binary search-lər işləyir
+sonra load factor default olaraq 75%-dir, onu aşandan sonra bucket size 2 dəfə artır (default = 16)
+sual? mapdakı elementləri silsək onda bucket size azalırmı? cavab: xeyr
+
+hashların eyni olmasına termin olaraq kolleziya deyilir.
+
+final vs effectively final
+final-da variable qarşısına final yazırıq və bilirik ki, dəyər-value heç vaxt dəyişməyəcək
+effectively final-da isə variable qarşısına final yazmırıq, amma dəyəri bir dəfə yazırıq və heç vaxt dəyişmir
+
+Amotic class-lar özləri arxada volatile keyword istifadə edirlər, yəni dəyəri keşdən Ram-dan götürür. MultiThread-də məcbur Atomic variable işlətməliyik, çünki multi thread-də int onsuz da işləməyəcək.
+
+iterator vs listiterator
+
+in listiterator, you can:
+- iterate backwards
+- obtain the iterator at any point.
+- add a new value at any point.
+- set a new value at that point.
+
+With iterator you can move only forward, but with ListIterator you can move backword also while reading the elements.
+With ListIterator you can obtain the index at any point while traversing, which is not possible with iterators.
+With iterator you can check only for next element available or not, but in listiterator you can check previous and next elements.
+With listiterator you can add new element at any point of time, while traversing. Not possible with iterator.
+With listiterator you can modify an element while traversing, which is not possible with iterator.
+
+Atomic classlar multi thread applarda mütləq ki, istifadə olunmalıdır və onlar arxa planda özləri multi thread üçün nəzərdə tutulub. Misal üçün orda volatile istifadə olunub. Yəni dəyərlər keşdən yox birbaşa RAM-dan götürülür. Multi thread appda biz bu atomic classların obyektini işlətməliyik.
+Misal üçün deyək ki, tiktokda iki meyxanaçı canlı yayımda meyxana deyib yarışırlar və sən də kimi dəstəkləyirsənsə girib o meyxanaçıya səs verirsən. Deyək ki, hər meyxanaçı üçün də ekranda 1 ədəd düymə var. "MexyanaçıA-ni dəskətlə!" "MexyanaçıB-ni dəskətlə!" adında 2 ədəd button var. İndi canlı yayımda minlərlə istifadəçi o düymələri girib klik edirlər və hər meyxanaçıya neçə nəfər səs verib biz onu hesablamalıyıq. Deyək ki, bizim int cnt = 0; dəyişənimiz var hər azarkeş klik edəndə cnt++ yazırıq. Multi thread appda təbii ki bu işləməyəcək, eyni anda iki və daha çox azarkeş klik etsə vsyo bizim cnt keşdən götürəcək tutaq ki 10 nəfər eyni ayna klik edəndə amma bizim cnt 1 vahid və ya nəbilim 3 vahid artmış olacaq, halbuki 10 vahid artmalı idi. Burda mütləq ki, AtomicInteger işlətməli idik onda o özü volatile istifadə edir deyə eyni anda neçə nəfər də klik etsə o sayda increment olacaqdı.
+
+AtomicInteger nə zaman istifadə edilə bilir? multithreadingdə. shared datamız varsa. stackda saxlanmayan datadırsa yani method içindəki variabledirsə ehtiyac deyil bunlarda, amma classda ən yuxarıda (methodlardan da yuxarıda) olan variabledırsa onda lazımdır. çünki onlar arxada volatile işlədir, methodları safe methodlardır, yəni məlumatı keşdən yox RAMdan götürür
+
+
+Volatile-nin də demişdik mənfi cəhəti oldurki nisbətən zəif sürətdə işləyirlər, amma Multi thread applarda onları işlətməyə məcburuq, başqa yolumuz yoxdur onsuzda. Əslində AtomicInteger int-ə nisbətdə bəli gec işləyir, amma onun kodunu elə optimal yazıblarki əslində o qədər də gec işləmir, yəni işimizi görür, problem yoxdur.
+
+Volatile üçün internetdə qəşəng nümunə var ki, biz tutaqki evdə oturmuşuq divanda pivə içmək istəyirik. Yanımızda balaca soyuducular olur ee portable, ondan var onun içində pivə var, onu götürüb içirik. Bu birinci hal. Sonra mətbəxdə soyuducuda da pivə var onu da gedib gətirib içə bilərdik. Bu ikinci hal. Bir də çöldə yaxınlıqda market var orda da soyuducuda pivə satırlar gedib onu alıb onu da içə bilərdik. Bu üçüncü hal. İnternetdəki nümunədə deyirdiki biz kodda volatile yazanda gedib pivəni o çöldəki marketdəki soyuducudan gətirir, yəni uzaqdan gətirir RAM-dan. O nümunədə keş isə bizim yanımızda onu xırda portable soyuducu idi 😀
+
+Hansı class-ın obyektini yaratmaq olmur? - Abstract class
+Constructoru var? - var
+niyə? - çünki onu extend edən class-ın obyekti yaradılanda həmin classın constructoru işə düşür və inheritance qaydasına görə həmin constructorun içərisində abstract classın constructoru da işə düşməlidir
+
+bir class-ı immutable etmək üçün nə etmək lazımdır?
+1. classı final elə
+2. field-lər private
+3. setter-ləri yığışdır
+4. getter-lərdə əgər mutable obyekt qayıdırsa onu clonlayırıq. Səbəbi də odurki, əgər obyekti girib dəyişsələr belə bizə təsir etməyəcək, çünki biz obyektin özünü yox clonunu qaytarırıq
+
+constructoru private harda etmək olar?
+1. singleton class-larda
+2. constant class-larda. yalnız field-lər olur onlarda da public static final olur. Class-ın obyektini yaratmağa ehtiyac olmur
+
+try with resources - exception handling zamanı istifadə olunur. finally block-unu avtomatik özü icra edir, amma yalnız AutoClonable interface-sini implements edən resursdursa onda try with resources istifadə edə bilirik.
+
+Thread yaratmağın hansı üsulları var?
+1. Thread classından extends etmək
+2. Runnable interface implements etmək
+3. Callable interface implements etmək
+Runnable ilə Callable nə fərqi var? qaytardığı tipdə fərqi var
+Hər ikisi functional interfacedir, yəni yalnız 1 ədəd abstract methodu var
+Runnable interface-dəki həmin o method void-dir yəni dəyər qaytarmır
+Callable interface-dəki method isə Future obyekt qaytarır. Bunda threadi buraxandan sonra cavabı izləmək olur, axırı nə oldu bilmək olur
+Completable Future in Java Araşdır
+
+current table-ya index qoysaq cədvəl lock olacaq. gərək gecə serveri söndürüb qoyaq neçə saat production işləməsin. postgresql-də asyncron index var, cədvəli lock etməmiş index qoyur
+primary key və unique constraintləri avtomatik index yaradır
+serial və bigserial özündə increment saxlayır
+
+Transaction
+ACID principles:
+1. Atomicity - ya transaction fully olaraq keçməlidir, fully rollback olmalıdır
+2. Consistency - data consistentliyi pozulmamalıdır, cədvəllər - tərəflər arasında state eyni qalmalıdır, pozulmamalıdır, yəni bir tərəfdə status Completeddirsə, digər tərəfdə də completed olmalıdır və ya bir tərəfdə məbləğ 5 manatdırsa digər tərəfdə də 5 manat olmaldır. Misal üçün sən 5 manat göndərdin, qarşı tərəfə 6 manat getdi çatdı bu o deməkdirki consistency pozulub
+3. Isolation - kənar müdaxilə olmamalıdır, digər bir transaksiya filan bura qoşulmamalıdır. Digər əməliyyat varsa ikinci bir transaksiya kimi edilməlidir
+4. Durability - safe şəkildə proses bitir. bir transaction commit olunubsa yəni proses bitibsə artıq bu andan sonra bu transaksiya barəsində heç bir dəyişiklik edilə bilməz, rollback oluna bilməz və s.
+Sual: Durability nə vaxt pozula bilər? bir nümunə de. Cavab: Databaza həmişə bir ədəd olmur. Bizim yazdığımız master databazadır, amma onun replicasiyası olur, standy filan olur. buna Sharding deyilir. Durability belə pozula bilər ki, biz master db-yə yazdıq OK cavabını aldıq, elə bildik bizim transaksiya bitdi. Amma həmin data standy-a düşmədisə onda durability pozulmuş olur. Replicasiya məntiqi 2 cür ola bilər. Sinxron və Asinxron. Durability-ni pozmamaq üçün biz replicasiya məntiqini sinxron qoymalıyıq.
+
+Active Profile. misal üçün necə etmək olar ki, local profile-də feign-dəki url-i çağırmasın. əvəzində nəsə static bir şey qaytarsın?
+Feign client bir interface olduğuna görə təzə bir mock class yazadıb feign interface-ni implements edib (təbii ki classı springə bean kimi tanıtdırmaq üçün yuxarıya @Component yazmaq çox vacibdir), həmin mock class-da feign interfacedəki methodumuzun eynisini override ilə çağırıb, return static data qaytara bilərik. Misal üçün return data type Student idisə, return Student.builder().name("test).surname("test").build(); yaza bilərik. belə olanda həmin class-ın üstünə @Profile("local") yazırıq, feign interface-yə isə @Profile("!local") yazırıq
+
+@Fallback annotation (spring 6.2-də gəlib) - bir interfaceni çoxlu classlar implements edə bilər. Kodu run edəndə bəzən spring tam başa düşməyə bilər ki, hansısı classın beanini həmin interfeysə inject edim onda üzərinə @Fallback annotation yazdığımız classın beanin inject edəcək. Yəni @Fallback annotation bir növ default bean işini görür. @Primary, @Qualifier annotationlarına oxşar işlər görür
+
+Problemlər:
+- Lost update
+- Dirty read
+- None repeatable read
+- Phantom read
+
+Transaction isolation layers. Yuxarıdan aşağı getdiksə təhlükəsizlik artır, amma işləmə sürəti zəifləyir. 1 və 4 məsləhət deyil. Cari keysə görə 2 və ya 3 istifadə edilir
+- 1. Read uncommitted
+- 2. Read committed (dirty read problemini həll edir) - default budur. commitdən qabaq double check edir. əgər eyni anda eyni sətir üçün yalnız bir transaksiya işləyirsə onda bu işimizi görəcək
+- 3. repetable read (non-repetable problemini həll edir). ödənişlərlə bağlı hallarda bu istifadə olunur. son dəyəri götürür. bir növ volatile kimi. eyni anda databazadakı eyni sətr üzrə paralel transaksiyalar varsa onda məcbur bunu işlətməliyik (və ya Serializable). optimistic locking burda olur. select for update - variablenin state-ni başlayır izləməyə. son dəyəri götürür. non-repetable read problemini manual olaraq özümüz həll etmək istəsək select for update buraxırıq. onda manual özümüz update etmiş oluruq datanı
+- 4. Serializable (bütün problemləri həll edir) - digər tranzaksiyaları fully olaraq bloklayır. ən təhlükəsiz budur, amma ən gec işləyən də budur. həmçinin pessimistic locking burda olur
+
+Set<Integer> set = new HashSet<>(); -> bu kod compile olunanda burdakı Generics Object clasına formalaşır, çevrilir. Eli bil Set<E> idisə Set<Object> olur. O hərfləri Objectə çevirir. Sonra OOP-nin polimorfizim qaydasına görə də Objectə Integer dəyəri mənimsədir. Buna Runtime Polimorphizim deyilir.
+
+HashMap vs HashTable
+HashMap-ə null key əlavə edə bilirik
+HashTable-da yox
+
+Kodda amount olan hissələrə double və ya float yox, BigDecimal qoyun. mütləq!!! bir çox problemin həlli üçün. doubleda misal üçün ola bilər ki 20/4 = 5.00000000001 filan versin, lazımsız başağrısı olan bilər
+
+çalış databazanı (postgresql, mongodb), hətta hərşeyi docker-də qaldır, yəni hərşeyin ayrıca app-nı tək-tək yükləmə. əvəzində dockerdə qaldır hərşeyi
+
+throw new NotFoundException("message") -> burda e yazma, çünki bu hissə user-ə göstərilir. full stack traceni userə çıxarmaq birincisi ehtiyac deyil, ikincisi təhlükəlidir. ora user oriented mesaj yazmaq lazımdır. e-ni log.error-larda, log.infor-larda yazırıq. exceptionu loga yaz
+
+@JsonInclude(USE_DEFAULTS) - bu annotation class üzərində də qoymaq olar, field üzərində də. O deməkdirki əgər inputda bu parametri göndərməsək normalda həmin parametrin dəyəri bizə null gələcəkdisə, bunu qoyanda həmin parametr null gəlmir, elə classın içində yazdığımız default value gəlir.
+
+@JsonInclude(USE_DEFAULTS)
+private Integer page = 0;
+
+@JsonInclude(USE_DEFAULTS)
+private Integer count = 5;
+
+həmçinin @FieldDefaults. aşağıdakı kod bütün fieldləri final edir, təkcə email-dən başqa
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal=true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class Person {
+
+    String firstname;
+    String lastname;
+    @NonFinal
+    String email;
+		
+    // Constructor here
+    // toString() here
+
+}
+
+
+.collect(Collectors.toList()) ilə .toList()-in fərqi nədir? Java yuxarı versiyalarda Collectors.toList() yazanda özü məsləhət verir ki onu toList() ilə əvəz elə.
+cavab: toList() immutable object qaytarır.
+
+servisin işi yalnız biznes məntiqi olmalıdır. loglar, nəbilim mapperlər, convertlər və s hamısını çıxarmalıyıq digər classlara (util classlarına, mapper classlarına və s)
+
+limit offset məntiqi niyə gec işləyir?
+cavab: çünki offset 5000 yazmışıqca və limit 100 yazmışıqsa, əslində o limit 5100 kimi işləyir, sonra 5000-i tullayıb 100-ü bizə göstərir, yəni əslində arxada 100 sətirlik script kimi yox 5100 sətirlik script kimi işləyir ona görə deyirlər paginationda limit offset məntiqi gec işləyir.
+
+scheduler, joblar.
+Scheduler joblarını özümüz qoyuruq ki hansı vaxtlarda işləsin
+SchedulerLock nə üçündür? - job yalnız 1 dəfə (1 podda) işlətmək üçün. Biz SchedulerLock işlətməsək boşda neçə ədəd podumuz varsa jobumuz həmin sayda işləyəcək
+
+mütləq deyilki, Scheduler jobları üçün fixed bir vaxt qoyaq, orda sadəcə qoymaq olur ki, neçə dəqiqədənbir işləsin. orda sadəcə fixedDelay 15 dəqiqə filan yazırıq, özü 15 dəqiqədənbir işləyir, bir növ fixed vaxt qoyduğumuzda bunun: 0 15 * * * * alternativi kimi olmuş olur
+
+https://crontab.guru/ = bu saytda bir az qurdalamaq olar vaxtları
+
+multithread appda (hansı ki indi onsuzda single thread app demək olar yoxdur) tutaqki siz yazmısıqki gecə saat 12-də bir job işə düşsün. sizdə o job 1 dəfə işə düşəcək? əlbəttə ki yox. neçə pod varsa o sayda işə düşəcək. biz burda bu problemi bir neçə üsulla həll edə bilərik:
+1. SchedulerLock - Shedlock - run process in only 1 pod
+2. K8S (Kubernetes) Cron Jobs - jobu spring bootda yəni kodda yox, Kubernetes-də yazırıq. Kubernetes calls your API. bu da əslində qeyri adi bir şey deyil. biz sadəcə Kubernetes-ə controller classımızda olan hər hansı bir API (url) veririk, və deyirik tutaqki saat 12-də bu url çağır, o da çağırır. Kubernetes-i bir növ UI kimi istifadə etmiş oluruq. Kubernetes load balancer məntiqi ilə çağırır deyə, sorğunu yalnız 1 poda göndərir
+3. bu joblar springdə yalnız 1 threaddə işə düşür deyə tutaqki sən eyni jobu 2 dəfə dalbadal çağırmaq istəyirsən, misal üçün bir saat 12:00-da, bir də saat 12:01-də. bunlar eyni thread-də olduğuna görə bir birindən asılıdırlar. yəni birinci bitməsə ikinci başlamayacaq. yəni ola bilər ki, 12:01-də (ikinci) qoyduğun job hələ birinci işə düşən öz işini bitirməyib - threadi hələ işğal edib deyə işə düşməsin.
+amma yox bizə mütləq lazımdırki neçə dəfə ora yazmışıqca onların hamısı 100% işə düşsün onda thread-ləri ayırmaq lazımdır. necə? onu araşdır.
+Misal üçün @Async
+
+Asynxron prosseslərdə HTTP Responsedə 202 ACCEPTED status code qaytarırıq.
+joblar default olaraq yalnız 1 threadə işləyir. yəni orda bir məntiq var ki, bir job bitməmiş ikincisi başlamır. misal üçün biz qoymuşuq ki, job 1 dəqiqədənbir işə düşsün, amma kodda Thread.sleep(5 dəqiqə) qoymuşuq, onda jobumuz 1 dəqiqədənbir işə düşməyəcək. Birinci işə düşən bitəcək 5 dəqiqəyə. ondan sonra 1 dəqiqə keçəndən sonra ikinci dəfə eyni job işə düşəcək. Yəni biz 1 dəqiqədənbir qoymuşuq, amma faktiki jobumuz 6 dəqiqədənbir işləyəcək.
+əgər yox biz istəsək ki, mütləq 1 dəqiqədənbir işə düşsün, yəni bundan öncəkinin bitməyindən asılı olmayaraq, onda başqa thread qoşmalıyıq, @Async annotation və ya Executor Servislər (fixed thread pool) köməyi ilə

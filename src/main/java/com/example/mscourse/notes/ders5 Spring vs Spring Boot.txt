@@ -10,7 +10,11 @@ Spring Framework vs Spring Boot Framework
 
 Spring Boot işləmə prinsipində əsas 2 üstünlüyü var:
 1. DI - dependency injection. patterndir. composition zamanı öz işini görür. yəni bir classın içinə bir bean yazanda o bean-i ora inject edir. (classın obyekti Springdə bean adlanır)
-2. IoC - inversion of control. obyektləri bizim yaratmırıq, arxa planda özü yaradır. kod run olan kimi IoC bütün bean-ləri yaradır, yığır bir containerə, yəni new işinə baxır. Həmin bean-ləri isə inject etmək işinə DI baxır.
+2. IoC - inversion of control. obyektləri bizim yaratmırıq, arxa planda özü yaradır. kod run olan kimi IoC baxır hansı bean classları var və həmin classların beanlərini yaradır, yığır bir containerə, yəni new işinə baxır. Həmin bean-ləri isə inject etmək işinə DI baxır.
+
+IoC-in hansı realizasiyaları var?
+1. Application Context
+2. BeanFactory - xırda applarda istifadə olunur
 
 Spring-də bean yaratmağın üsulları:
 1. annotation - ən rahatı

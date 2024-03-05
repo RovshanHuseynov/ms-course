@@ -1,0 +1,93 @@
+Facade ilə proxy-nin fərqi nədir?
+
+Linkedin - Kafkanı gətirib bazara
+Netflix - Mikroservisləri gətirib bazara
+
+
+Design Patterns
+
+İlk öncə onu deyim ki, Design Patter-ləri öyrənəndəilk öncə başa düşmək lazımdırki, həmin design pattern hansı problemi resolve edir. Bunu başa düşmədək elə əzbərləyəcəyik, amma sabahısı gün qarşımıza bir problem çıxanda bilməyəcəyik ki, bu hal-da hansı design pattern işlədək. Real praktisdə onu harda implement edim onu görməyəcəyik.
+
+Creational design patterns provide various object creation mechanisms, which increase flexibility and reuse of existing code.
+1. Singleton - Lets you ensure that a class has only one instance
+Bunu adətən common used yerlərdə istifadə edirlər ki, bir dəfə yaransın və istifadə etmək istəyənlər elə həmişə onu istifadə eləsin. Misal üçün dbConnection üçün bir dəfə obyekt yaradıb sonra həmişə həmin eyni obyekti istifadə edə bilərik, ya da mapper class-miz var hansı ki DTO ilə Entity arasında convert rolunu oynayır, onda mapper class-ın obyektini bir dəfə yaratmaq bizə kifayət edəcək.
+Javada singleton-u implement etmək üçün ən rahat üsul hansıdır? Enum. Çünki Enum-ın default xüsusiyyətləri bizə singleton pattern qurmağa çox kömək edir. Enumda bir object default olaraq public, static, final-dır, hansı ki, elə singleton-da da bizə o lazımdır. Singleton məntiqini enum ilə qoyanda bizim Enum-dakı methodlarımız static olmalı deyil, adi methodlar olmalıdır.
+
+public enum UserStatus {
+	ACTIVE, DELETED;
+	
+	public void map(){
+		System.out.println("");
+	}
+}
+
+bunu kənardan çağıranda: UserStatus.ACTIVE.map(); - bu artıq singleton-dur.
+
+Enum özü thread safe-dir, ona görə multi-thread applarda singleton lazım olan istənilən hissədə rahat olaraq Enum istifadə edə bilərik.
+Enum ən yaxşı yoldur, amma class-ı singleton etmək üçün başqa yol da var (hansı ki recommended yol deyil). bu yol manual implementation
+
+I. class-ın constructorunu private edirik
+II. getInstance adında static bir method qurub orda class-ın obyekti null-dur yoxsa yox if ilə yoxlayırıq. null-dursa new object deyirik, deyilsə elə mövcud obyekti qaytarırıq. Burda problem odurki, multiple thread-lərdə bu işləmir, ya bütöv methodumuzu syncronized etməliyik, və ya daha yaxşı olar ki, syncronized block istifadə edək orda da block-un içərisində bir daha if null yoxlamalıyıq burda da bəzi əlavə problemlər çıxır: Dublicate check problem. Threads -> happens before (JMM - Java Memory Management) - Thread-lərdə kodda bir birində asılı olmayan sətirlər yerlərini dəyişə bilərlər. Yəni bəzi sətirlər bizim kod yazdığımız ardıcılıqla yox, tez və ya gec işləyə bilər. Burda ona görə bizim o if-miz yerini dəyişə bilər və bir müddət sonra işləyə bilər, nəticədə bizim yenə də nə vaxtsa 2 obyektimiz yarana bilər. Bunun da qabağını almaq üçün gərək volatile keywordu işlədək. volatile barrier qoyur, sətirlərin yerdəyişməyinə icazə vermir. volatile yazdığımız hissənin əvvəlinə barrier qoyur ki, həmin hissələr keşlənə bilməsin və yerdəyişmə olmasın. təbii ki volatile özü də syncronized keyword-u kimi kodun işləməyini ləngidən bir keyword-dur. 
+volatile keyword birbaşa ram-da olan dəyəri gətirir, volatile yazmasaq keşdəki dəyəri gətirə bilər və bu heç də ən son dəyər olmaya bilər. Multi threading environment-də volatile istifadə olunur.
+
+2. Prototype - Lets you copy existing objects
+Real use case: bizdə elə bir obyekt var ki, o proses boyu dəyişə bilər və biz onu get edəndə gözləmədiyimiz bir şey çıxa bilər. Onda həmişə işi görməmişdən qabaq new object yaradırıq ki, işimizi görüb bitirəndə sonradı obyekti ekrana verəndə qeyri adi gözləmədiyimiz bir şey çıxmasın ekrana. Misal üçün shared data ola bilər, biz onu işlədəndə başqa bir servis də onu işlədər, və biz işimizi görənə qədər o datada başqa bir servis dəyişiklik edə bilər, onda biz işimizi görüb bitirəndə bizdə qeyri adi bir nəticə alınacaqdı. Daha aydın misal: List<Integer> list = List.of("1"); bu list singleton olsa başqa bir servis də list.add("2") edəcək və səndə artıq size() = 1 deyil, 2-dir. heç bəlkə sənin xəbərin də yoxdur bundan. Ona görə belə shared datalarda singleton sərf eləmir, mütləq prototype etməliyik ki, biz obyekti işlətmədən öndə new edək, sıfırdan özümüz nəsə set edək. Sonra nəsə surpriz olmasın.
+prototype design pattern həmin obyektin kopyasını istifadə etmək lazım olan zamanlarda istifadə edirik
+
+3. Builder - Çoxlu constructor yaratmağımızın qarşısını alır. Həmin problemi həll edir. Lets you construct complex objects step by step. If we have lots of variables inside class, then it will be a complex task to write all the combination of constructors. First of all, our class will be full controctor methods, and futhermore, we will face order problems, then which one is null, which one is not null, nightmare.
+
+4. Factory - Provides an interface for creating objects in a superclass, but allows subclasses to alter the type of objects that will be created
+kodu elə yazaq ki, application özü başa düşsün ki, nə zaman bizə hansı obyekt lazımdır, və o zaman o obyekti yaradıb bizə qaytara bilsin. Burda Obyekti hansısa input parametrin əsasında (çox hallarda bu ENUM olur) yaranır, beləliklə biz o methoda nə göndərsək onu yaradıb bizə göndərir.
+Misal üçün: bizdə logistika şirkəti var, çatdırılma edir. Şirkət təzə başlayanda yalnız maşınla çatdırır deyə kodda hər yerə new Car() yazmışıq. İndi sabah şirkət böyüdür indi təyyarə ilə də çatdırma oldu, onda kodda hardakı new Car() yazmışıq o hissələri gərək bir bir dəyişək ora bir if yazaq ki, Car-dır yoxsa Plane. Belə bir problem olmasın deyə, elə bu genişlənmə halını əvvəlcədən nəzərə alıb, obyektin inject olunma hissəsini çıxarırıq bir Factory interfeysinə, orda da bir method qoyuruq o methoda hansı ENUM göndərsək arxada if-switch ilə həmin ENUM-a uyğun classın new edib obyektini yaradır.
+Misal üçün proqramlaşdırma dilləri də ola bilər (Java, Phyton), və ya Database (MySql, Posgresql). və ya Bolt deyə bilərik, econom maşın var, comfort var, business var, XL var və s.
+Burda Factory classların-da yalnız bir method olur create() adında orda obyekt new edib qaytarırıq, yəni Factory classlarını yalnız obyekt yaratmaq üçün istifadə edirik. Bu Factory class-ları da Factory interface-ni implements edir.
+
+5. Abstract Factory - Lets you produce families of related objects without specifying their concrete classes
+bu da bir növ Factory-lərin Factory-si. Yəni hansı Factory yaradacığımızı da Abstract Factory-də ENUM ilə deyirik. Beləcə koda gələcəkdə başqa Factory-lər də qoşa bilək.
+Misal üçün: bayaqkı Factory-də olan logistika şirkəti sabah qərar verir ki, indi də restoran biznesinə girsin. bunun logistika Factory-si qalır, bir dənə də əlavə Food Factory yaradırıq və ən başda duran Abstract Factory-ə ENUM-da 2 input ötürə bilərik FOOD or LOGİSTİK və gələcəkdə yeni Factory-lər də əlavə edə bilərik.
+
+Structural design patterns
+class ierarxiyası, sistem dizaynımızı asanladırır
+
+1. Adapter - Bir datanı başqa bir dataya, və ya bir sistemi başqa bir sistemə convert edir. Mikroservis arxitekturasında ən çox istifadə olunur. Mikroservis varsa adapter design pattern var. Adapter həm mikroservis daxilində həm də bir neçə mikroservisin istifadəsi üçün ola bilər.
+I. Bir mikroservisin içində common used işlər yəni ortaq funksiyaları - ümumi komponentləri adapter ilə yazıla bilər. Misal üçün: Bir tip datanı başqa bir tip dataya dəyişən classlar (parser classları - JSON-u XML-ə parse edən) və ya mapper classları (entity-ni dto-ya map edən classlar)
+II. Çoxlu mikroservislər arasında isə inteqrasiya üçün istifadə edilə bilər. Misal üçün: başqa bir şirkətlə inteqrasiyalar və ya şirkət daxili common based servislər. Misal üçün: sənədi imzalamaq, SİMA inteqrasiya. Misal üçün: hansısa bir əməliyyat bitəndə email göndərsin. adapter.email adında bir email yazırıq, iş birəndə email göndərmək istədiyimiz ms-lər bu adapteri çağırır. Beləliklə dublicate kod etmirik. Misal üçün bir 10 ms-dən email göndərəcəkdiksə 10-na da gedib email class-nı kopyalayacaqdıq, 10-da da kodda hansısa kitabxananı çağıracaqdıq və s, üstəlik sabah 11-ci ms-də email göndərəsi olsa, o kodu 11-ciyə də kopyalamalı olacaqdıq. Üstəgəl sabah email göndərmə məntiqində bir dəyişiklik olsa, onda 11 yerdə girib kod dəyişəcəkdik. Konkret başağrısı.
+
+Adapter son nöqtədir. Ən sonda çağırılır və bir işi görür, cavabı qaytarır. Yəni özü nəyisə çağırmır. Amma bir ms ola bilər ki, bir adapteri çağırsın, ondan cavab alıb, sonra başqa bir adapteri çağırsın.
+
+Misal üçün:
+Any miscroservice -> ms.notification.collector -> adapter.sms
+											   -> adapter.mail
+											   -> adapter.telegram
+											   -> adapter.push.notification
+və burda ms.notification.collector özü də ayrıca nəsə bir iş görə bilər. yəni mütləq deyilki adapter çağırsın. misal üçün job ola bilər ki, gecə saat 12-də filan filan notification göndər.  
+
+
+2. Bridge - daha çox 1 ms-in içərisindəki kod skrukturuna aiddir, nəinki bir neçə miscroservice arasında. Ms daxili olur bu design pattern. Fərz edək ki, bir ms-in içərisində sizin ortaq bir işiniz var, hansı ki fərqli fərqli classlar onu istifadə edəcək, onda bir o ortaq işi ortada bir növ interfeys ilə yazırsız ki, müxtəlif class-lar onu istifadə edə bilsin. Bridge design pattern-də daha çox abstract class-lar üzərindən istifadə edilir, inheritance məntiqi ilə kodu yazırıq. composition use edirik deyə. yəni istifadə edəcəyimiz classın obyektini bridge classımızda variable kimi qeyd edirik.
+
+3. Decorator - proxy kimidir, yəni hansısa iki server arasında, vəya serverlə databaza arasında dayanan bir servisdir və ya classdır. Proxy-dən fərqi odurki, proxy götürdüyü class-da heç bir dəyişiklik eləmir, amma decorator dəyişiklik edə bilər. Decorator da classı götürüb fully kopyalayır, amma üzərinə nəsə gəlir, misal üçün başqa bir method da əlavə edir. Yeni bir funksionallıq artırır. Proxy ilə decorator fərqi odurki, proxy heç nəyi dəyişmir olduğu kimi kodu götürür, dekorator isə koda nəsə əlavə edir.
+
+4. Facade - bizdə çətin sistemlər və ya çətin kodlar ola bilər, onu işlətmək çox çətin ola bilər. Onda biz bir facade yazırıq, bizim ms-lər facade-la işləyir, facade isə o çətin kodumuzla işləyir. Yəni çətin sistemi bizim ms-lər birbaşa görmür. Facade işi yüngülləşdirmək üçündür, zir-zibili biz görməyək deyədir. Facade ilə adapter-un fərqi odurki, Adapter həmişə son nöqtədir, facade heç vaxt son nöqtə deyil. Facade bir inteqrasiya üçün deyil, adapter inteqrasiya üçündür. Facade daxildə bir harasa qoşulmaq üçündür, amma ağır logici - yüngülləşdirmək üçündür. Misal üçün: hansısa legacy sistem ola bilər, spagetti kod olar bilər və ya hansısa library-yə qoşulmaq lazım ola bilər. Facade-də əsasən 1 interface yazırıq, bütün ms-lərimiz bu interface-lə işləyir, ordakı method-ları hansısa input parametrləri ilə çağırır, vsyo, qalan o spagetti kodu filan o həmin interface-in arxasında gizlədirik, özü gedir sistemə qoşulur nə lazımdır edir bizə cavabı verir. Yəni heç kim birbaşa o library ilə işləmir, bizim ms-lər yalnız facade ilə işləyir. Bir növ biz o qəliz məntiqi-realizasiyanı facade-ın arxasında gizlədirik, çölə də rahat interfeys-lər veririk ki, kim istəsə istifadə edə bilsin.
+
+5. Proxy - hansısa iki server arasında, vəya serverlə databaza arasında dayanan bir servisdir və ya classdır, məqsəd də odurki, biz sadəcə istəmirik nəyinsə nəyəsə birbaşa accessi olsun. Filter məntiqi kimi başa düşə bilərik. misal üçün biz a serverindən b databazasını birbaşa çağırmaq istəmirik, ortaya bir validation qoymaq istəyirik ki, görək hələ bir permission var mı, onda ortaya proxy qoyub validation orda yoxlayırıq. Proxy görütüb bizim kodu fully kopyalayır yəni real implementation-un kopyasıdır və onun üzərində işləyir, amma class-ın özündə bir dəyişiklik etmir. Fully kopyalayandan sonra isə ora nəsə bir yoxlama (authentication, filter) filan qoya bilər. Proxy ilə decorator fərqi odurki, proxy heç nəyi dəyişmir olduğu kimi kodu götürür, dekorator isə koda nəsə əlavə edir
+
+Sprində proxy ilə işləyən hansı annotation-ları tanıyırsız? məşhurlardan
+@Transactional
+@Async
+@Cachable
+AOP modulu
+Hibernate
+
+
+Behavioral design patterns
+
+1. Iterator - bu design pattern vasitəsilə biz data structurlarda elementlərin arasında irəliləyə bilirik. istənilən collection iterator istifadə edir, çünki iterable interface-dən gəlir. iterable interface-də foreach mehtodu var, next var, previous var, hasNext var
+
+2. Chain of Responsibility - bir biri ilə related olan - əlaqəli olan işləri görmək üçün. Misal üçün: şərt1 varsa, şərt2-ni elə. şərt2 varsa şərt3-ü elə. burda hətta elə chain ola bilər ki, o bir iş görməmiş belə digərinə ötürə bilər. misal üçün if ilə nəyisə yoxlayar o if düz gəlmir deyə öz işini görməz və chain-in növbəti elementini yoxlayar. Belə çıxır ki, burda hər chain-də if(null) şərtini yoxlamaq lazımdır. Amma chain heç vaxt qırılmır, həmişə eyni olur. Misal üçün A chain ötürür B chainə, o da ötürür C chainə. İndi elə bir hal ola bilər ki, B chain iş görməyəcək, amma bu o demək deyilki A chain birbaşa C chain çağıracaq, ardıcıllıq olduğu kimi qalacaq, sadəcə B görəcək bunluq iş yoxdur, heç bir iş görmədən C chainə ötürəcək 
+
+3. Observer - daha çox hansısa framework-lərdə istifadə olunur. pubsub (publisher subscriber) mexanizmində (redis-də və ya kafka-da istifadə edilir) həmin bu observer design pattern istifadə edilir. Real dünyada misal üçün: youtube və ya instagram. 1 publisher olur və onun çoxlu subscriber-ləri olur. Publisher nəsə edəndə, dəyişəndə subscriber-lərin xəbəri olur. Misal üçün: biz redis-lə listener qoya bilərik ki, amerikaya biletin qiyməti nə vaxt dəyişsə (və ya nə vaxt 1000$-dan aşağı düşsə) mənə notification-email göndər. Burda subscriber-lərə notification göndərmiş oluruq.
+
+4. Strategy - fərz edək ki, oxşar operation-lar var, amma logic-ləri eynidir. və ya eyni işi görmək istəyirik, amma fərqli üsullarımız var. Orda bir növ strategy-lər qoyuruq hazır durur hamısı. Sonra hansısa bir şərtə əsasən qərar veririk ki, bu halda filan strategy ilə işi gör. Yoxsa filan şərtdirsə digər bir strategy ilə işi gör. Strategy design pattern-ni çalışın factory design pattern ilə işlədin, yəni hansı class-ın obyekti yaransın o hissəni if-else ilə yox factory design pattern ilə yazır.
+
+Misal üçün. adapter-lə bir third party şirkətlə inteqrasiya etmişik. Misal üçün: Sima-ya qoşulub sənədlərimizi imzalayırıq. Qoşulma hissəsi deyək ki, eynidir, sənədi göndəririk, istifadəçini göndəririk imzalayır geri qaytarır, bura kimi bütün sənədlərdə eyni. Amma qayıdanda müxtəlif sənədlərdir deyə müxtəlif işlər görməliyik, onun üçün bir strategy yazırıq. Deyək ki, strategy adında bir interface yazırıq, onun içində bir ədəd prosesCallback() adında method var, ondan da çoxlu strategy classları implment edib, biz sənədin tipinə görə callback-mizi ötürürük lazımı strategy classımıza. Tutaq ki, kredit sənədi idisə kreditStrategy classına ötürürük, payment sənədidirsə, paymentStrategy class-ına və s. Ümumi desək müxtəlif logic-ləri müxtəlif strategy-lərə yığırıq. Həmin o strategy classlarının obyekt-lərini factory design pattern-i ilə yəni enum input parametrinə görə yarada bilərik.
+Başqa bir misal: bankda vətəndaş xaricə pul köçürmək istəyir. Bank olaraq da bizdə iki fərqli pul köçürmə sistemi var. misal üçün westernUnion və zolotoyaKorona. Orda stretegy qoyuruq ki, inputtda enumda westernUnion ötürülsə onda factory design patterndə westernUnion adında strategy classının obyekti yaransın və pul westernUnion üsulu ilə köçsün (yəni o classın doPayment() methodu çağırılsın), və yə zolotoyaKorona üsulunun.

@@ -1,0 +1,34 @@
+Loglar
+
+Nəyi loglamaq olar, nəyi loglamaq olmaz?
+sensitive dataları loglamaq olmaz, loglasaq belə masked şəklində loglamalıyıq, misal üçün username, password, card details. belə şeyləri loglasaq elə loga hər girib baxan ordan sənə mənfi niyyətlə istifadə edə bilər. Misal üçün kard detallarını loglasaq kartdan girib pul çəkə bilər.
+hər şeyi loglamaq olmaz? log özü də vaxt aparır, performansa təsir edə bilir. Ən çox da List qaytaran methodları loglamaq məsləhət deyil
+list qayıdan responsu mütləq loglamalısansa yalnız id-ləri loglaya bilərsən
+list dataları loglamaq olmaz, içərisində minlərdə data gətirib performans itkisi verə bilər
+sonra hibernatedə də entity classın içərisində olan digər relationları ToString edib loglamaq olmaz, n+1 probleminə gətirib çıxarır, və ya orda relation varsa hətta @OneToMany relation varsa demək orda List data var yenə də List datanı loglamaq bad practise-dir performans issue yaradır.
+
+loglarda stacktrace (e) yazırıq, çünki ona girib logda baxıb problemi araşdıracayıq
+throw new Excention("text", e) - bura isə e yazmırıq. çünki burda userə mesaj çıxarırıq, e-ni bura yazsaq usərə stacktrace çıxaracaq, hansı həm userin başı qarışacaq uzun uzun texniki terminlər görəcək, və daha pisi başı çıxan adamdırsa orda hər class-ı hər məlumatı görəcək deyə sistemi hack da edə bilər. beləliklə userə sadəcə mətn çıxarırıq. e-ni isə log-a yazırıq ki, özümüz girib araşdıraq və problemi tapaq.
+
+loglar harda yazılmalıdır?
+əsasən service classlarında. Bəzən həqiqətən də lazım olarsa util classlarda (çox vaxt lazım olmur)
+controllerdə loga ehtiyac yoxdur, çünki orda kod yazmırıq, orda uzaq başı validation edirik
+
+log level
+TRACE
+DEBUG
+INFO
+WARN
+ERROR
+FATAL
+
+dev mühitdə məsləhətdirki default level - DEBUG qoyaq
+prod mühitdə məsləhətdirki default level - INFO qoyaq
+
+log recommended pattern: 
+log.info("ActionLog.methodName.start id:{}", id);
+log.info("ActionLog.methodName.end id:{}", id);
+log.info("ActionLog.methodName.success id:{}", id);
+log.info("ActionLog.methodName.error user not found with id id:{} ex:{}", id, e);
+
+Logging üçün məşhur toollar var, ən məşhur ELK stack-dır. Elastic Logstash Kibana

@@ -1,0 +1,49 @@
+OutOfMemoryError nə zaman baş verir? - Heap dolanda
+StackOverFlowException - Stack dolanda
+
+hər ikisinə misal çək: yəni dolmasına aid use case de.
+1. çoxlu obyekt qoysaq yer dolacaq. misal üçün list yaradıb onun içinə çoxlu obyekt add eləsək, hansısa bir ağır table-dən findAll methodu çağırsaq
+2. elə bir recursiya yazsaq ki, o sonsuz işləyir onda sonsuz stack frame-lər açılacaq və stack-i doldurmuş olacayıq
+
+Checked Exceptionu Unchecked (Runtime) Exceptiona dəyişməyin yolları?
+1. Sneaky Throws (Checked exceptionu convert edib RuntimeException atır)
+2. try catch (Checked Exception){
+  throw new RuntimeException
+}
+3. rollback for = Exception.class -> Checked Exceptionları da rollback edir
+
+throw new NotFoundException("message") -> burda e yazma, çünki bu hissə user-ə göstərilir. full stack traceni userə çıxarmaq birincisi ehtiyac deyil, ikincisi təhlükəlidir. ora user oriented mesaj yazmaq lazımdır. e-ni log.error-larda, log.infor-larda yazırıq. exceptionu loga yaz
+
+@Transactional annotation yalnız Runtime Exception ilə işləyir demişdik, bəs kodu neçə yazaq ki, problem çıxmasın, checked exception-ları da rollback eləsin 
+
+
+Springdə bir çox annotation proxy pattern əsasında işləyir. Spring özü arxanda 2 cür yolla (2 implementation) proxy yarada bilir:
+1. CGLIB - classı extends edib proxy edir. final classlarda CGLIB işləmir, çünki final classlarda extends keyword işləmir
+2. JDK Dynamic proxy - classı implements edib proxy edir
+
+nə zaman methodun əvvəlinə @Transactional annotation qoymaq olmaz? 
+1. private method olanda. belə olanda heç compile mərhələsini keçməyəcək
+2. method checked exception qaytarırsa
+
+@Transactional annotation proxy pattern əsasında işləyir
+nə zaman @Transactional annotation ümumiyyətlə methodun üzərinə qoya bilməyəcəyik? private method olarsa
+@Transactional annotation default olaraq hansı exceptionları rollback edir? RuntimeException (Unchecked)
+@Transactional(noRollbackFor = MyException.class) - MyException exception çıxanda onu rollback etməyəcək. bunu bilmək çox vacibdir. bizdə real praktisdə elə bir hal ola bilər ki, bizə lazımdırki kod exception tullasın, yəni userə exception çıxaraq, görsün ki xəta baş verdi, amma transactionu rollback etməyək, yəni databazaya məlumat düşsün. bunu noRollbackFor ilə etmək olur
+@Transactional(rollbackFor = Exception.class) - Exception çıxanda onu rollback edəcək. Kodda nə zamansa unexpected şəkildə checked exception çıxa bilər, misal üçün harasa qoşulmuşuq filan orda checked exception gələ bilər bizə
+
+Necə edək ki, @Transactional annotation Checked Exception-ları da rollback etsin?
+1. Sneaky Throws
+2. try catch (Exception ex){
+  throw new RuntimeException();
+}
+3. rollback for = Exception.class -> Checked Exceptionları da rollback edir
+
+@Transactional annotation nə zaman öz funksiyasını yerinə yetirmir? işləmir (rollback etmir) və @Transactional haqqında digər məlumatlar
+1. @Transactional annotation sözünü qoyduğumuz method başqa bir classdan (başqa bir bean-dən) çağırılanda orda normal işləyir (rollback edir)
+2. @Transactional annotation sözünü qoyduğumuz class eyni classın başqa bir methodundan çağırılırsa onda işləmir yəni rollback etmir. səbəb? proxy design pattern işləmə prinsipinə ziddir. eyni bean daxilində orda proxy bir birini görüb tanıya bilmir. ona görə başqa classa çıxarmaq lazımdır, onda başqa bean olur deyə onu görə bilir. yəni @Transactional annotation işləməsi üçün həmin methodu fərqli bir beandən çağırmalıyıq. (Eyni beandən də çağırmaq olur self injection edib amma o bad practise sayılır. Eyni classın adını elə həmin classda composite kimi yazıb sonra springin özündə 2 parametri aktivləşdirmək lazımdır, bean overriding = allow/true, circular referance = true etməliyik)
+eyni classın içində başqa bir methodu çağıranda eyni eyni obyektlə çağırır axı. şərti olaraq deyəs method A() içində method B() yazanda this.B() çağırılır deyə proxy design pattern qurula bilmir. Amma B() methodu başqa bir classda olsa idi, deyək ki test classında, onda method A()-dan B()-ni çağıranda test.B() yazmalı idi, artıq test.B() elə yazılışından da göründüyü kimi this.B() yox test.B() oldu yəni başqa bir beani/obyekti çağırdıq və burda proxy pattern qurula bilir.
+3. başqa bir classdan çağırılan bir method var və üzərinə @Transactional annotation qoymuşuq. sonra bu methodun içində yenə də başqa bir classın bir methodunu çağırırıq hansı ki həmin methodun üstündə də @Transactional annotation var, yəni bir növ nested @Transactional annotation yazmışıq. belə olanda 2 methoddan hər hansı birində xəta olarsa proses rollback olunacaq, yəni @Transactional annotation normal işləyəcək. bir iç içə @Transactional annotationlar özünü 1 transaction kimi aparır
+4. propagation var. @Transactional(propagation = Propagation.REQUIRED) bu defaultdur yazmasaq da olar. Bu o deməkdirki iç içə @Transactional annotationları özünü 1 transaction kimi aparacaq. bir də var @Transactional(propagation = Propagation.REQUIRES_NEW). bunu yazanda transaction-ları bölmüş oluruq, təzə transaction yaratmış oluruq. iç içə transaction açanda ikinciyə Propagation.REQUIRES_NEW yazsaq, transactionları ayırmışıq deyə ola bilər birincidə xəta verib rollback etsin, amma ikinci methodda (ikinci transactionda) xəta yoxdur deyə o hissə icra olunmuş qalsın, rollback olunmasın
+5. @Transactional(isolation = Isolation.REPETABLE_READ) yazmaq olar. 4 option var, default = Isolation.READ_COMMITED
+
+exception handling user experienceni artırmaq üçündür. Userə normal xəta mesajı, xəta kodu, normal HTTP Status çıxarmaq üçündür ki, istifadəçi öz səhvini özü başa düşsün və düzəltsin. Birdə kodda exception handling olmasa istənilən xətaya 500 sistemdə xəta baş verdi qaytaracayıq, istifadəçi də bilməyəcək səhv nədədir hər xırda şeyə görə götürüb qaynar xəttimizə zəng vuracaq. Halbuki biz userə normal xəta çıxarsaydıq misal üçün "şifrəniz minimum 8 simvoldan ibarə olmalıdır" istifadəçi bunu oxuyacaq və səhvini düzəldəcək. exception handling bunu üçündür.

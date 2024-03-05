@@ -2,13 +2,21 @@ Araşdırma
 
 JIC - just in time compiler
 
+sual1. necə edək ki, finally-dəki kod işləməsin? ən az 4 yolu var
+sual2. super classdakı run methodu throw RuntimeException edirsə sub classdakı override olunmuş run methodu throw Exception edə bilərmi?
+sual3. catch-sız try yazmaq olarmı?
+
+
+All the methods an interface are public and abstract by default.
+All the variables of an interface are final, static and public, it means they are constants.
+
 
 read about: Iterator vs ListIterator
 
 -amend commit / force push / fixup / rebase
 
 Iterator
-Fail safe and fail fast iterators
+Fail safe and fail fast iterators 
 
 HTTP methods
 REST
@@ -18,17 +26,17 @@ Path variable
 Request Param(query param)
 Kabab-case
 Secure Remote Password protocol
-
+ 
 Idempotency
 Status codes
 REST NAMING conventions
-
+ 
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
 https://restfulapi.net/resource-naming/
 https://www.partech.nl/en/publications/2023/01/best-practices-for-naming-rest-api-endpoints
 
 
-PECS principle producer extend cunsumer
+PECS principle producer extend cunsumer - GENERICS-lər haqqında. Wildcard-lar. hansında yalnız Read əməliyyatı etmək olur, hansında həm Read, həm də Write əməliyyatı etmək olur?
 JMM - Java memory model/modul
 Binary Search
 Select for update
@@ -37,18 +45,13 @@ Agregat functions
 Joins
 Sequences
 Index(bi tree algoturm)
-
-ACID principles
-Transaction isolation layers and problems
-
+ 
+ 
 DB version control – liquibase
 
 
 tracing
 Tranzaksiya nedir?
-
-ACID principler
-Transaction isolation level
 
 Executer Poll-lar
 - single
@@ -64,18 +67,36 @@ threadlərdə visibility problem nədir?
 thread locking-də fairness anlayışı nədir?
 reterrant vs read write lock
 fork join pool necə işləyir?
-spring pool niyə heap-ə gəldi? nə vaxt gəldi? Java neçədən sonra?
+spring pool əvvəllər heap-də deyildi (əvvəl permgen space adlı yer var idi orda idi). niyə heap-ə gətirildi? nə vaxt gəldi? Java neçədən sonra?
+garbage collector yalnız heapdə işləyir. referancesi olmayan obyektləri təmizləyir
+heapdə olmayanda garbage collector onu silə bilmirdi deyə spring pool artırdı nə yer tuturdu
+The change has been done on java7 itself that the constant pool has been moved to typical heap space from permgen space(still the pool behaviour is same) where as permgen space completely removed in Java 8. Metaspace is nothing to do with constant pool specially, it is generic for all objects.
+Nothing is changed as in the concept of string pool but from java 7 onward string pool is created in heap memory instead of permgen. The advantage of doing this is the unreferenced variable in string pool will be taken care by JVM garbage collector. So it will improve over space
+Before Java 7, the JVM placed the Java String Pool in the PermGen space, which has a fixed size — it can’t be expanded at runtime and is not eligible for garbage collection.
+A Note about Java 9
+Until Java 8, Strings were internally represented as an array of characters – char[], encoded in UTF-16, so that every character uses two bytes of memory.
+With Java 9 a new representation is provided, called Compact Strings. This new format will choose the appropriate encoding between char[] and byte[] depending on the stored content.
+Since the new String representation will use the UTF-16 encoding only when necessary, the amount of heap memory will be significantly lower, which in turn causes less Garbage Collector overhead on the JVM.
+The risk of interning Strings in the PermGen (instead of the Heap) is that we can get an OutOfMemory error from the JVM if we intern too many Strings.
+From Java 7 onwards, the Java String Pool is stored in the Heap space, which is garbage collected by the JVM. The advantage of this approach is the reduced risk of OutOfMemory error because unreferenced Strings will be removed from the pool, thereby releasing memory.
 threadlər? executer service nədir? onu neçə cür yaratmaq olar? fixed vs cached
 semafora nədir? mutex nədir?
 race condition nədir? hansı case-də yaşana bilər? nümunə gətir?
 double check locking nədir?
-java referances: soft, strong and etc. use cases of them/ real implementation
+java referances: soft, strong, weak and etc. use cases of them/ real implementation
 misal üçün javada yaratdığımız obyektlər strong referancesdir
+Collection hierarcy oxu
+Map, Hashmap, TreeMap, LinkedHasmap, Identity Hashmap, Weak HashMap - temporary dataları burda store eləmək yaxşıdır. Çünki data ilə işimizi gördük artıq lazım deyil, datalar GC ilə silənən zaman avtomatik gedib o Weak HashMap-dan da onu siləcək (bizim applarda bu istifadə olunmur, əsasən oyunlarda filan lazım olur). Identity Hashmap isə key-ləri hashcode-a görə yox, reference-yə görə store edir.
+String s = "a";
+String s1 = new String("a");
+bunlar hər ikisi String pool-a gedir düşür, amma String poolda fərqli reference-də yadda saxlanılır. new yazdığımıza görə hərdəfə o təzə yaddaşda saxlanacaq, amma elə belə String s = "a", String s5 = "a", String s6 = "a"; yazsaq bunların hamısı eyni referancedə saxlanacaq
+indi biz bir Hashmap götürsək və hashMap.put(s); və hashMap.put(s1); etsək, onda bunlar 2 fərqli key kimi ora düşəcək. (ikisi də "a"-nı saxlamaqlarına baxmayaraq). amma identity hashMap-də bunlar eyni element kimi düşəcək, override olacaq.
+Interview question: Map və ya Set-də bilirik ki, key tərəf həmişə unique-dir. Necə edə bilərik ki, bunu pozaq? yəni Map və ya Key-ə eyni bir Stringi insert edək, ora 2 dəfə düşsün
 niyə String class-ı immutabledir?
 runtime polimorphizim compile time polimorphizim nədir?
 dynamic binding static binding nədir?
 singleton patterni necə violite eləmək olar? (4-5 yolu var deyəsən)
-reflection ilə violite eləmək olar?
+reflection araşdır. reflection ilə violite eləmək olar?
 singletonu static holder pattern ilə necə yazmaq olar?
 lazy initializaion vs eager initializaion
 lazy initializaion exception nə zaman baş verir və necə resolve etmək olar?
@@ -91,8 +112,11 @@ proxy məsələsinə görə
 @Configuration class final ola bilər? yox. niyə?
 @Configuration class içərisində bean-lər yaratmışam, bu methodlar private ola bilər?
 proxy məsələsinə görə
+Springdə bir çox annotation proxy pattern əsasında işləyir. Spring özü arxanda 2 cür yolla (2 implementation) proxy yarada bilir:
+1. CGLIB - classı extends edib proxy edir. final classlarda CGLIB işləmir, çünki final classlarda extends keyword işləmir
+2. JDK Dynamic proxy - classı implements edib proxy edir
 Transactional propogation
-for example I have a server, and my server accepts 100 requests per second. But my client sends me more than 100 requests per second and my server gets down. I cannot tell my client not to send more than 100 requests. How can I set limit for requests in my side?
+for example I have a server, and my server accepts 100 requests per second. But my client sends me more than 100 requests per second and my server gets down. I cannot tell my client not to send more than 100 requests. How can I set limit for requests in my side? (araşdır rate limiting pattern)
 databasa indexləri hansı data structure ilə işləyir?
 hansı halda index qoymağımız mənasız olur?
 composite index vs index?
@@ -107,3 +131,29 @@ avl tree vs red black tree fərqi
 network - farewall nədir?
 farewall varsa spring security istifadə etmək lazımdırmı?
 dns nədir? dns lookup nədir? necə işləyir?
+optimistic lock (cari oxuduğu data ilə databazadakı data fərqlidirsə onda sizin qabaqcadan təyin elədiyimiz şeyi edir. misal üçün ya rollback edir, ya exception atır və s), pessimistik lock (bad practise, tranzaksiya bitənə kimi bütün cədvəli bloklayır)
+Set<Integer> set = new HashSet<>(); -> bu kod compile olunanda burdakı Generics Object clasına formalaşır, çevrilir. Elə bil Set<E> idisə Set<Object> olur. O hərfləri Objectə çevirir. Sonra Runtimedə isə həmin Obyekt classı Integer classına çevrilir. yəni OOP-nin polimorfizim qaydasına görə də Objectə Integer dəyəri mənimsədir. Buna Runtime Polimorphizim deyilir.
+round robin load balancer
+stack yaddaş - shared data deyil. yalnız 1 thread-ə aiddir. misal üçün biz bir methodun içində int cnt = 0 yazsaq, sonra elə həmin methodun içində cnt++ filan eləsən heç bir problem yoxdur
+heap yaddaş - shared datadır. bütün threadlər bu datanı işlədir. biz bir methodun içində yox classın ən yuxarısında int cnt = 0 (global variable kimi), onda bu artıq heapdədir deyə shared data sayılır, kodda cnt++ yazanda bütün threadlər cnt++ edə bilər, bizim bu kodda başımız ağrıdayaq
+
+
+Garbage Collector
+1. Hansı hissələrə bölünür? young generation, old generation
+2. Obyektlər bu generationlarda necə irəliləyirlər? nə zaman hansı generationa keçir
+3. spacelər? minor major
+4. stop the world prosesi. garbage collector işə düşəndə bütün threadləri dayandırır, yalnız 1 thread işləyir o da garbage collector işləyən thread
+5. stop the world nə vaxt baş verir? qarşısını almaq olarmı?
+6. hansı GC-lər ümumiyyətlə var? serial, parallel, G1, CMS, hansı versiya JDK-da işlənirlər
+7. GC-ni biz özümüz çağıra bilinikmi? finalise method, deprecated olub, System.gc(); biz kodda yazanda garbage collector işə düşürmü?
+yox. System.gc(); yazanda garbage collectorun öz hesablamaları var ki, onu hesablayır, onun özünün bir delta-sı var əgər hesablamadakı rəqəm o deltaya uyğun gəlirsə işə düşür keçmirsə düşmür
+yəni biz 100% qarantiya ilə gc-ni çağıra bilmərik. elə olsa infiniti for loop və ya while yazıb onun içində System.gc(); yazıb sistemi çökdürə bilərik
+
+Multithreading
+1. threadləri neçə cür yarada bilərik? Thread, Runnable (functional interface with void method), Collable (functional interface with return future data type method)
+2. future nədir? bu future ilə Collable-dan cavab ala bilirik ki, misal üçün bu thread successful oldu yoxsa yox orda return var deyə baxıb sonra onun əsasında başqa bir iş görə bilərik
+3. Runnable biz implements də edə bilərik başqa cür nə edə bilərik? functional interface olduğuna görə onu lambda ilə də istifadə edə bilərik
+4. executor servislər nədir və növləri? thread pool-lardır, biz threadləri yaradıb bir pool-a yığırıq, sonra lazım olduqca istifadə edirik. single (poolda 1 ədəd thread yaradır, buna ehtiyac yoxdur çünki springdə @Async annotation var. yalnız o zaman istifadə edilər bilər ki bizdə void qaytaran method yox feature qaytaran method lazımdır), schedular (bu da çox istifadə olunmur çünki springdə scheduler var onsuzda), fixed (özün təyin edirsən ki poolda neçə ədəd thread yaransın)
+5. misal üçün bizdə bir biznes qaydası var ki, eyni anda 1 müştəri 1 ödəniş edə bilər birdən çox ödənişi eyni anda edə bilməz. bunun həlli monolitdə - mutex - 1 useri locklamaq üçün. (reentrant lock) - bir dənə threadi, bir dənə datanı locklayır, semafor nədir? - bir neçə mutex. misal üçün məbtəxdə 2 ədəd oturacaq var, və 5 nəfər adam girib yemək yemək istəyir. iki-iki locklayır, 1 nəfər yedi bitirdi 3-cü adamı buraxır, bu şəkildə. və ya bir API var sən istəyirsən bu API-a sorğular 3-3 getsin ondan semafor işlədə bilərik
+mutex və semafor mikroservisdə işləmir, monolitdə işləyir. səbəbi? podlar. mikroservisdə podlar çoxdur. podlar çox olanda mutex 1 podu locklasa da digər poddan sorğu gələ bilir. mikroservisdə locklama cache-ing ilə olur. misal üçün: redis locking araşdır
+semafor həmçinin monolitdə bir növ müəyyən qədər access vermək məntiqi işlər üçün də istifadə olunur. misal üçün bir API var biz ora istəyirikki sorğular 3-3 getsin. ona semafor işlədə bilərik
