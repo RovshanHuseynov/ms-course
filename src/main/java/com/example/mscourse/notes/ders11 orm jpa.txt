@@ -41,7 +41,7 @@ Repository: (bunda SOLID-in Interface segrataion-u istifadə edilir)
 ümumiyyətlə ierarxiya bu cürdür -> JpaRepository interface extends PagingAndSortingRepository extends CrudRepository extends Repository
 
 
-application.yml-da jpa qoşanda 
+application.yml-da jpa qoşanda
 1. show-sql: true qoysaq onda o Repository interface-də olan methodların arxada hansı sql script işlətdiyini göstərəcək (dev environmentdə həmişə show-sql = true qoyun ki kodu yazanda özünüz baxın, amma prod environmentdə təbii ki show-sql = false yazın performans itməsin deyə latency verməsin)
 devdə yox, amma localda bunu həmişə elə, arxada nəyi çağırır özün görəsən deyə
 2. hiberbate: ddl-auto: none - (none is default value here) disable DDL (data definition language) handling for hibernate. entity classlarımıza uyğun olaraq create table, create column filan özü etməsin (recommended)
@@ -50,7 +50,7 @@ create - create the schema and destroy previo (not recommended)
 create-drop - create and then destroy the sc (not recommended)
 validate - validate the schema, make no changes to the database. validasiya eləsin görək bizim entity structorumuz (table name, column name) databazakı cədvəlləki structurla üst üstə düşürmü (recommended)
 
-yəni bizdə liquibase tərəfdə artıq cədvəllər və ya columnlar create olunubsa hibernate tərəf onu create etməsin. hibernate tərəfdə bizim db-də create olunmuş cədvəli alter edib, yəni korlaya bilər, ona görə məsləhət görülmür - bad practise sayılır, çünki ddl məntiqli işləri (create, alter) onsuzda liquibase ilə edirikdə və həmçinin version kontrol kimi saxlayırıq ki bunu kim edib, bu tip işləri hibernate kimi bir toola (ümumiyyətlə ORM-ə) ötürməyimiz yaxşı deyil, belə şeylər liquibase ilə idarə olunsa yaxşıdır. hibernate-də isə DML-lər (INSERT, UPDATE, DELETE) üçün olsa yaxşıdır. 
+yəni bizdə liquibase tərəfdə artıq cədvəllər və ya columnlar create olunubsa hibernate tərəf onu create etməsin. hibernate tərəfdə bizim db-də create olunmuş cədvəli alter edib, yəni korlaya bilər, ona görə məsləhət görülmür - bad practise sayılır, çünki ddl məntiqli işləri (create, alter) onsuzda liquibase ilə edirikdə və həmçinin version kontrol kimi saxlayırıq ki bunu kim edib, bu tip işləri hibernate kimi bir toola (ümumiyyətlə ORM-ə) ötürməyimiz yaxşı deyil, belə şeylər liquibase ilə idarə olunsa yaxşıdır. hibernate-də isə DML-lər (INSERT, UPDATE, DELETE) üçün olsa yaxşıdır.
 ya ddl-auto yazmırıq ki ümumiyyətlə default olan none götürsün, ya da validate yazırıq ki, db cədvəl ilə entity classlar arasında (table name-də və ya column name-lərdə) fərqlilik olsa onu validate edib bizə desin. misal üçün cədvələ column əlavə etmişik amma yadımızdan çıxıb kodda o columnu entity classa əlavə etməmişik
 
 Ralations:
@@ -152,7 +152,7 @@ open-in-view = true by default. bu o deməkdirki spring JPA özü sessiyanı ba�
 
 
 Optimistic lock, pessimistic lock
-1. Optimistic lock - yalnız bir sətri (row) locklayır, yalnız 1 row. Cədvələ yeni bir column əlavə edirik. Tutaq ki adı olsun version (bigint datatype). Burda data type olaraq version long da ola bilər, modification_date timestamp da ola bilər və s. 
+1. Optimistic lock - yalnız bir sətri (row) locklayır, yalnız 1 row. Cədvələ yeni bir column əlavə edirik. Tutaq ki adı olsun version (bigint datatype). Burda data type olaraq version long da ola bilər, modification_date timestamp da ola bilər və s.
 @Version
 private Long version;
 Bunu qoyanda eyni anda eyni 1 sətrdə 2 fərqli tranzaksiya əgər istəsə ki sətrdə nəyisə update eləsin, baxır ki versiyaları düz gəlmir, onda ikinciyə xəta verir (ObjectOptimisticLockingFailureException). O xətanı da biz özümüz try catch-da tutub istədiyimiz əməliyyatı edə bilərik. Tutaqkı ora kod yaza bilərik ki exception throw eləsin ki misal üçün "zəhmət olmasa təkrar yoxlayın", və ya catch hissədə repo.save() yazıb edə bilərikki həmin tranksiyaza da accept olsun və ya @Retryable annotation qoşa bilərik. Bu bizim biznes tərəfin qərarı ilə tənzimlənir
@@ -167,7 +167,7 @@ bunu kodda necə edirik? repository interfacemizdə olan methodun (misal üçün
 senior interview question: bir transaction(REPETABLE_READ) qoysaq onda optimistic_lock-un gördüyü işi görmüş olacayıq. Harda hansını istifadə edək? Niyə optimistic lockun performansı qismən də olsa daha yaxşı olacaq?
 cavab: 1-cisi - optimistic lock-u exception ilə tutub biznesə uyğun olaraq istədiyimiz əməliyyatı edə bilərik, 2 - optimistic lock versiya checking-i nə vaxt eləyir? kodda yalnız save yazılan hissədə. amma REPETABLE_READ transactiyası qoysaq method fully həmisə isolated olaraq icra edilir, yəni sırf sətri fullu locklayır, getlərdə də save-lərdə (insert-lər) də (prosesi 1 sətir üçün eyni anda yalnız bir ədəd transaksiyaya endirir). misal üçün user1 və girib eyni sətri get edib baxmaq istəsə, user2 də eyni sətri get edib baxmaq istəsə. optimistic lock burda get-ləri locklamır deyə hər iki user eyni anya transaksiyanı yerinə yetirə biləcək. amma REPETABLE_READ qoysaqdıq bu 2 user bu əməliyyatı tək-tək etməli olacaqdı, bu transaksiyalar paralel getməyəcək, ardıcıl gedəcək
 
-həmçinin non-repetable read problemini manual olaraq özümüz həll etmək istəsək select for update buraxırıq. onda manual özümüz update etmiş oluruq datanı. select for update - variablenin state-ni başlayır izləməyə. son dəyəri götürür. 
+həmçinin non-repetable read problemini manual olaraq özümüz həll etmək istəsək select for update buraxırıq. onda manual özümüz update etmiş oluruq datanı. select for update - variablenin state-ni başlayır izləməyə. son dəyəri götürür.
 select for update - variablenin state-ni başlayır izləməyə. son dəyəri götürür. non-repetable read problemini manual olaraq özümüz həll etmək istəsək select for update buraxırıq. onda manual özümüz update etmiş oluruq datanı
 
 Hibernate caching: L1, L2 caching

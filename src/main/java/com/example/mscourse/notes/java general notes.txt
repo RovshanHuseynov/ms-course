@@ -113,9 +113,9 @@ Problemlər:
 Transaction isolation layers. Yuxarıdan aşağı getdiksə təhlükəsizlik artır, amma işləmə sürəti zəifləyir. 1 və 4 məsləhət deyil. Cari keysə görə 2 və ya 3 istifadə edilir
 - 1. Read uncommitted
 - 2. Read committed (dirty read problemini həll edir) - default budur. commitdən qabaq double check edir. əgər eyni anda eyni sətir üçün yalnız bir transaksiya işləyirsə onda bu işimizi görəcək
-- 3. repetable read (non-repetable problemini həll edir). ödənişlərlə bağlı hallarda bu istifadə olunur. son dəyəri götürür. bir növ volatile kimi. save etmədən öncə value-ni bir dəfə də check edir (double check). eyni anda databazadakı eyni sətr üzrə paralel transaksiyalar varsa onda məcbur bunu işlətməliyik (və ya Serializable). optimistic locking burda olur. 
+- 3. repetable read (non-repetable problemini həll edir). ödənişlərlə bağlı hallarda bu istifadə olunur. son dəyəri götürür. bir növ volatile kimi. save etmədən öncə value-ni bir dəfə də check edir (double check). eyni anda databazadakı eyni sətr üzrə paralel transaksiyalar varsa onda məcbur bunu işlətməliyik (və ya Serializable). optimistic locking burda olur.
 
-həmçinin non-repetable read problemini manual olaraq özümüz həll etmək istəsək select for update buraxırıq. onda manual özümüz update etmiş oluruq datanı. select for update - variablenin state-ni başlayır izləməyə. son dəyəri götürür. 
+həmçinin non-repetable read problemini manual olaraq özümüz həll etmək istəsək select for update buraxırıq. onda manual özümüz update etmiş oluruq datanı. select for update - variablenin state-ni başlayır izləməyə. son dəyəri götürür.
 select for update - variablenin state-ni başlayır izləməyə. son dəyəri götürür. non-repetable read problemini manual olaraq özümüz həll etmək istəsək select for update buraxırıq. onda manual özümüz update etmiş oluruq datanı
 - 4. Serializable (bütün problemləri həll edir) - digər tranzaksiyaları fully olaraq bloklayır. ən təhlükəsiz budur, amma ən gec işləyən də budur. həmçinin pessimistic locking burda olur
 
@@ -148,7 +148,7 @@ public class Person {
     String lastname;
     @NonFinal
     String email;
-		
+
     // Constructor here
     // toString() here
 
