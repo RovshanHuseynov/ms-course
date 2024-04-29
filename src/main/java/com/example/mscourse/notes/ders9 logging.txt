@@ -31,4 +31,4 @@ log.info("ActionLog.methodName.end id:{}", id);
 log.info("ActionLog.methodName.success id:{}", id);
 log.info("ActionLog.methodName.error user not found with id id:{} ex:{}", id, e);
 
-Logging üçün məşhur toollar var, ən məşhur ELK stack-dır. Elastic Logstash Kibana
+Logging üçün məşhur toollar var, ən məşhur ELK stack-dır. Elastic Logstash Kibana, Graylog, Datadog

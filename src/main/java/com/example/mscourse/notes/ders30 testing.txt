@@ -1,0 +1,47 @@
+Hansı testlər var?
+1. Unit testing - kodun xırda-kiçik bir hissəsinin test edilməsi. öz xırda hissəmizi test edirik, digər hissələri mock-layırıq, yəni fərq edirik ki, o hissə işləyir.
+2. Contract testing - controller layer test, request-in və response fieldlərinin data type, adları checking. Bir  növ json-nu test edirik. Json istifadə olunan bütün yerlərdə istifadə olunur. Misal üçün Rest və Queue sorğularında bu testi istifadə edirik.
+3. Load testing - layihə ilk dəfə proda çıxmamışdan öncə bunu mütləq edib sonra proda çıxmalıyıq. Əvvəlcədən fikirləşməliyik və ya biznes tərəfdən rəqəmi almalıyıq ki, bizə 1 saniyədə ən pik saatda maksimum neçə sorğu gələcək, misal üçün cavab gəldi 10 min. onda bu 10 mini göndərib test edirsiniz ki, gücü çatırmı yoxsa yox. Əgər gücü çatmırsa proda çıxmaq olmaz.
+4. Stress testing - bunu isə onu görə keçirirlərki, sistem maksimum hansı yüklənməyə dözə bilər? burda yuxarı limit olmur. Load testingdəki rəqəmdən (10 min) başlayıb qaldırırlar ki, ən yuxarı limit neçə olacaq. Misal üçün cavab çıxdı ki, bizim sistem 1 saniyədə maksimum 35 min 250 requestə gücü çatır. Artıq bu rəqəm bizi qane edir yoxsa yox o sonranın işidir. Bu rəqəmi bilmək ona görə vacibdirki, sistemə təzə feature, təzə müştərilər gəldikcə, kampaniya, aksiya keçirdikcə, biz hesablaya bilək ki, sistemimiz buna dözə biləcək ya yox.
+5. Penetration test - Information Security şöbəsi əməkdaşları tərəfindən aparılan testlərdir. Yenə də layihə ilk dəfə proda çıxanda 100% bu testi keçməlidir, sonra proda çıxmalıdır. Ddos attack testing, SQL injection testing, rate limiting, data leaking testing, all security issues, daxili əməkdaşların hansı məlumatları görməsi testi və s.
+6. Integration testing - ən çətini. vaxt çox aparır. bir servisin back-da getdiyi flow-nu yoxlayırıq, digər ms-ləri çağırmasını, queue-yə asinxron mesaj göndərməsi və s. unit testing-də demişdik ki, xırda bir hissəni test edirik, geri qalan hissələri isə mock-layırıq. burda isə elə deyil. burda heç nə mocklamırıq. burda hər şeyi full flow-nu real test edirik, real call-lar gedir. mühit özü mock mühit olur, amma həmin mühitdə hər şey real olur, databazanı da real qaldırırıq. keşi də. queue-ni də. Feign-də, Kafka da, Rabbit də. hər şeyi. burda in-memory databazalar məsləhət görülür (misal üçün h2). Əsas odurki real test databaza olub ora kirli data insert etməyək.
+7. End-to-End testing - bu ən gəlizidir, hətta Integration testdən belə. Front-dan back-a qədər hər şeyi test edir. bunu adətən front tərəf yazır ki, misal üçün filan düyməni user klik edəndə back-dan lazım olan response gəlirmi.
+
+TDD - test driven development. birinci test yazılır. sonra kod yazılmağa başlanılır.
+
+testing:
+unit
+contract
+penetration
+load
+stress
+integration
+
+mock - 95% istifadə olunan budur. Hətta bəzən 100%
+stub - Stubda input ötürmürük. Sırf elə belə method call edirik görək, method işləyirsə demək testi çekdi. (underscore (_) is a sign of stub. For example 1 parameter method: methodName(_), 2 parameters method: methodName(_,_) ) mocklana bilməyən datalar. mock işləməyən yerlər. misal üçün UUID, timestamp, LocalDate.now(), bunları mocklamaq olmur deyə bunları stub edirik, yəni mocklamırıq, skip edirik bu tip fieldləri
+spy - test etmədiyimiz class-methodlar. bunu istifadə eləmək bad practise sayılır. spy-da real call atır, amma test olar nəyisə test etmir.
+
+Unit testing - Spock Framework. Groovy üzərində qurulub.
+1. plugins { id 'groovy' }
+2. 3 dependency-ni əlavə edirik
+implementation org.apache.groovy
+testImplementation 'org.spockframework'
+testImplementation 'io.github.benas:random-beans:3.9.0'
+3. new Groovy class extends Specification
+
+Testi elə yazmaq lazımdırki koddakı istənilən-lüboy dəyişikliyə görə test qırılsın.
+
+given: səndə nə var? initialize your variables
+when: nə zaman? (burda test etdiyimiz servisi çağırırıq)
+then: assertions. checking your actual response whether equals to expected response. checking equalities. cavabda nə olmalıdır? expected result == actual result ?
+
+then hissədə bir nüans var ki, then hissədə == yazdığımıza görə == yazdığımız class-larda mütləq hashCode və equals methodları override olunmalıdır. Əks halda == əməliyyatı value-ni yox reference yoxlayacaq və həmişə false verəcək
+
+
+parametrized tests - bir test keysin altında müxtəlik inputları yoxlamaq. parametrized tests üçün
+1. methodun üzərinə @Unroll
+2. then hissəsindən sonra (ən aşağı hissə) where hissəsi artır və inputları | ilə daxil et
+
+Bir classı mocklamaq o deməkdirki, həmin classın yalançı-fake obyektini yaradırıq ki, o class-a real call getməsin.
+
+Static methodları və enum-ın içindəki methodları Mocklamaq mümkün deyil. Yəni onlara mütləq real call getməlidir. Başqa yolumuz yoxdur. Çünki onlar real time-da hamısı ayağa qalxırlar deyə.

@@ -1,11 +1,11 @@
-ORM - object relational mapping. bir məntiqdir, bir anlayışdır. bir specification-dur. koddakı(entity) classımızın object-ləri ilə databaza arasında əlaqə qurmağa kömək edir. bizə kömək edir ki, biz əllə bütün sql sorğularımızı yazmayaq, entity class-larımızı yaradaq və sql sorğuları özü icra eləsin. developerin işini rahatlaşdırmaq üçün
+ORM - object relational mapping. bir məntiqdir, bir anlayışdır. bir yanaşmadır, bir fikirdir. koddakı(entity) classımızın object-ləri ilə databaza arasında əlaqə qurmağa kömək edir. bizə kömək edir ki, biz əllə bütün sql sorğularımızı yazmayaq, entity class-larımızı yaradaq və sql sorğuları özü icra eləsin. developerin işini rahatlaşdırmaq üçün
 müsbət cəhəti - kodu səliqəli edir, boiler plate kodu azaldır, kodu səliqəli edir
 mənfi cəhəti - sql ilə kodun arasında bir layer artırmış oluruq, bizim dto-lar entity-lərə map olunur, arada istər istəməz vaxt gedir. arxada onsuzda standart jdbc işləyir. ORM is the approach of taking object-oriented data and mapping to a relational data store
-JPA - specification. (interface, abstraction). Jpa bir interface-dir, onun implementationu isə hər hansı bir ORM-dir. misal üçün Hibernate
+JPA - specification. (qaydalar toplusu, interface, abstraction). Jpa bir interface-dir, onun implementationu isə hər hansı bir ORM-dir. misal üçün Hibernate
 yəni layer olaraq ən yuxarıda JPA durur, bir aşağıda ORM, bir aşağıda isə sql scriptlər. hətta biz JPA istifadə eləməyib, birbaşa ORM-i çağıra bilərik, amma o bir az çətin olacaq
 biz interface StudentRepository extends CrudRepository yazırıq - bax bu interface JPA-dır
-sonra kodu run edəndə spring interface StudentRepository-in implementation classının yaradır bu class Hibernate-dir. Hibernate scriptlərinə show-sql edib baxa bilirik
-Hibernate - bir ORM-dir. JPA interfeysinin realizasiyasıdır, implementation-dur. Həmçinin ORM-in implementation-dur
+sonra kodu run edəndə spring interface StudentRepository-in implementation classının yaradır bu class Hibernate-dir. Hibernate scriptlərinə show-sql=true edib baxa bilirik
+Hibernate - bir ORM-dir. JPA interfeysinin realizasiyasıdır, implementation-dur.
 Hibernate bir növ sql ilə JPA arasında bir layer yaradır, elə hiberbate-in mənfi cəhəti bu layerin yaranmağıdır
 Hibernate sırf Java üçündür. Hibernate-də başqa bir mənfi cəhət n+1 problemidir, amma onun həlli artıq var
 ORM isə tək Java üçün deyil, bütün proqramlaşdırma dillərində var
@@ -15,18 +15,18 @@ Spring Data JPA - ? Remember, Spring Data JPA always requires a JPA provider suc
 JPA ilə işləyirsənsə JPA Buddy adında plugin var Intellij Idea-da onu yüklə
 
 Entity classlarımızda @Entity və @Id annotation yazmalıyıq (mandatory). @Id annotation burda cədvəldəki primary key sütununu ifadə edir
-Həmçinin Entity classlarımızda @Data işlətmirik, equals və hashCode methodlarına görə. və həmçinin equals və hashCode methodlarımızı özümüz override edirik
+Həmçinin Entity classlarımızda @Data işlətmirik, equals və hashCode methodlarına görə. və həmçinin equals və hashCode methodlarımızı özümüz override edirik və orda adətən id sütunu bizə kifayət edir, bir bir bütün sütunları yazmağa ehtiyac olmur
 Entity classlarımızda @Data qoymuruq (hashcode, equals və toString methodlarına görə. n+1 yaranmasın deyə). @Data qoymaq əvəzinə @Data-nın içində olan annotationları bir bir özümüz əllə classın üzərinə yazırıq. @Getter, @Setter və ən asas @EqualsAndHashCode(of = "id") yazırıq
 
 
 DTO nədir? nə zaman istifadə olunur? Data Transfer Object
 Biz kodda Entity classımızı nə heç vaxt API-dan birbaşa qəbul etməliyik (request parameter kimi), nə də heç vaxt API-dan response kimi entity class qaytarmalıyıq. Bu 2 hissədə Dto işlətməliyik. Səbəb? 1. təhlükəsizlik baxımından, cədvəlin strukturunu verməmək üçün. 2. biz həmişə entity classın bütün sütunlarını qəbul etmirik axı və ya cavabda qaytarmırıq axı
 
-id sütunumuza @GeneratedValue qoya da bilərik, qoymaya da bilərik (misal üçün UID case-də, və ya id-ni özümüz set ediriksə)
-@GeneratedValue 4 növü var:
-1. idendity - simple autoincrement. özü artır. 1,2,3,4 və s (idendity əslində elə özü arxa planda sequence yaradır)
+id sütunumuza @GeneratedValue qoya da bilərik, qoymaya da bilərik (qoymasaq özümüz ora value set etməliyik. misal üçün UID case-də, və ya id-ni özümüz set ediriksə)
+@GeneratedValue 4 növ strategy var:
+1. identity - simple autoincrement. initial value=1, increment rate=1 qaydası ilə özü artırır. yəni, 1,2,3,4 və s (identity əslində elə özü arxa planda sequence yaradır)
 2. sequence - databazakı sequence-i götürür. ordakı increment rule-a görə hərəkət edir. misal üçün initial value, increment rate ordan götürür
-3. auto - bu da idendity kimi özü 1-dən başlayıb tək-tək increment edir, amma arxada nəsə müəyyən logiclər saxlayır deyə performansı aşağı salır (məsləhət görülmür)
+3. auto - (default budur, yəni @GeneratedValue annotation qoysaq və içində heç nə dəyər ötürməsək özü default AUTO götürür) bu da identity kimi özü 1-dən başlayıb tək-tək increment edir, amma arxada nəsə müəyyən logiclər saxlayır deyə performansı aşağı salır (məsləhət görülmür)
 4. table - cədvəldə max id-ni tapıb increment edib o dəyəri ora set edir. çox gec işləyəcək (məsləhət görülmür)
 
 field-ləriminiz içində enum varsa orda @Enumerated annotation istifadə edirik
@@ -37,48 +37,48 @@ Repository: (bunda SOLID-in Interface segrataion-u istifadə edilir)
 1. CrudRepository - sırf CRUD əməliyatları üçün
 2. PagingAndSortingRepository - sırf pagination və sorting əməliyyatları üçün lazım olan methodlar
 3. JpaRepository - CRUD + page and sorting (burda pagable var). Filtering də bizə lazımdırsa onda JPASpecificationExecutor<PaymentEntity> interfaceni də vergül ilə implements edirik. Filtering əməliyyatını etdiyimiz classda isə Specification<PaymentEntity> implements edirik
+repository interface extents JpaRepository qoyanda sorting edə bilməmiz üçün orda Sort classının obyektini göndərməliyik (Sort sort). Həmçinin hansı sütuna görə sort ediriksə o sütunun göndərməliyik. Misal üçün user.getAge(). Belə olanda JPA bir növ sql scriptinə order by age; artırmış olur və məlumatı databazadan sorted şəkildə gətirir. Yəni biz artıq kodda Collections.sort() filan yazmalı olmuruq. Həmçinin bir neçə sütun da göndərə bilərik ki, o cür sort edib gətirsin. ACS, DESC necə istəsək.
 
 ümumiyyətlə ierarxiya bu cürdür -> JpaRepository interface extends PagingAndSortingRepository extends CrudRepository extends Repository
 
-
 application.yml-da jpa qoşanda
-1. show-sql: true qoysaq onda o Repository interface-də olan methodların arxada hansı sql script işlətdiyini göstərəcək (dev environmentdə həmişə show-sql = true qoyun ki kodu yazanda özünüz baxın, amma prod environmentdə təbii ki show-sql = false yazın performans itməsin deyə latency verməsin)
+1. show-sql: true qoysaq onda o Repository interface-də olan methodların arxada hansı sql script işlətdiyini göstərəcək (dev environmentdə həmişə show-sql: true qoyun ki kodu yazanda özünüz baxın, amma prod environmentdə təbii ki show-sql = false yazın performans itməsin deyə latency verməsin)
 devdə yox, amma localda bunu həmişə elə, arxada nəyi çağırır özün görəsən deyə
 2. hiberbate: ddl-auto: none - (none is default value here) disable DDL (data definition language) handling for hibernate. entity classlarımıza uyğun olaraq create table, create column filan özü etməsin (recommended)
 update - update the schema if necessary (the worst)
-create - create the schema and destroy previo (not recommended)
-create-drop - create and then destroy the sc (not recommended)
+create - Drops the existing schema and creates a new one. Create new schema and destroy previous one (not recommended)
+create-drop - create and then destroy the previous schema (not recommended) (Similar to create, but additionally drops the schema when the session factory is closed. Useful for testing where you want a fresh schema for each test run)
 validate - validate the schema, make no changes to the database. validasiya eləsin görək bizim entity structorumuz (table name, column name) databazakı cədvəlləki structurla üst üstə düşürmü (recommended)
 
 yəni bizdə liquibase tərəfdə artıq cədvəllər və ya columnlar create olunubsa hibernate tərəf onu create etməsin. hibernate tərəfdə bizim db-də create olunmuş cədvəli alter edib, yəni korlaya bilər, ona görə məsləhət görülmür - bad practise sayılır, çünki ddl məntiqli işləri (create, alter) onsuzda liquibase ilə edirikdə və həmçinin version kontrol kimi saxlayırıq ki bunu kim edib, bu tip işləri hibernate kimi bir toola (ümumiyyətlə ORM-ə) ötürməyimiz yaxşı deyil, belə şeylər liquibase ilə idarə olunsa yaxşıdır. hibernate-də isə DML-lər (INSERT, UPDATE, DELETE) üçün olsa yaxşıdır.
 ya ddl-auto yazmırıq ki ümumiyyətlə default olan none götürsün, ya da validate yazırıq ki, db cədvəl ilə entity classlar arasında (table name-də və ya column name-lərdə) fərqlilik olsa onu validate edib bizə desin. misal üçün cədvələ column əlavə etmişik amma yadımızdan çıxıb kodda o columnu entity classa əlavə etməmişik
 
 Ralations:
-1. one-to-one (bu relationda əgər əminik ki bunlar ömür boyu one-to-one qalacaqsa yəni dəyişməyəcəksə), məsləhət görülür ki performansa görə shared primary key istifadə edək. yəni hər iki cədvəldə ortaq primary key olur. hər iki cədvəldə primary key olara id sütunu var və bu iki id sütununu bir birinə bağlayırıq. misal üçün 1 cədvəldə id=5, digər cədvəldə id=5 eyni elementi ifadə edir). one ilə bitən relationda default fetching strategy is EAGER
+1. one-to-one (bu relationda əgər əminik ki bunlar ömür boyu one-to-one qalacaqsa yəni dəyişməyəcəksə), məsləhət görülür ki performansa görə shared primary key istifadə edək. yəni hər iki cədvəldə ortaq primary key olur. hər iki cədvəldə primary key olara id sütunu var və bu iki id sütununu bir birinə bağlayırıq. hətta demək olar ki əsas olmayan cədvəldəki shared primary key həm primary key, həm də foreign key məntiqini daşıyır. misal üçün 1 cədvəldə id=5, digər cədvəldə id=5 eyni elementi ifadə edir). one ilə bitən relationda default fetching strategy is EAGER
 shared primary keydə ikinci cədvəldə liquibase tərəfdə primary key olan sütuna (adətən adı id olur) həm də foreign key olur. (primaryKey : true, foreignKeyName : fk_table_two_name_to_table_one_name, references : table_one_name(id))
 shared primary key-də əsas olmayan entity-ə (ikinci entity-ə) @MapsId annotation qoyuruq
 2. one-to-many. many ilə bitən relationda default fetching strategy is LAZY
 3. many-to-many. many ilə bitən relationda default fetching strategy is LAZY
 
 bidirectional - ikitərəfli. a (entity) class içərisində composite olaraq b classının obyektini saxlayır və həmçinin b (entity) class içərisində composite olaraq a classının obyektini saxlayır
-unidirectional - birtərəfli. a (entity) class içərisində composite olaraq b (entity) classının obyektini saxlayırsan, amma b classında a classının obyektini saxlamırsan
+unidirectional - birtərəfli. a (entity) class içərisində composite olaraq b (entity) classının obyektini saxlayırsan, amma b classında a classının obyektini saxlamırsan. bunu istifadə edən zaman hansı class əsasdırsa o classın içinə relation qoyuruq və insert-lər selectlər update-lər hamısı bu entity üzərindən gedir
 
 Fetching strategies:
-Lazy - a cədvəlindən get sorğusu çəkəndə a-ın içində olan relationlar (joinlər, digər cədvəllər) gəlməyəcək. Ən azından ilk dəfədən (sonra field-field çəkəndə relationlar da gələcək)
-Eager - a cədvəlindən get sorğusu çəkəndə a-ın içində olan relationlar (joinlər, digər cədvəllər) gələcək, təbii ki hansının başına EAGER qoymusansa onlar gələcək. field field hərəsinə başqa bir şey qoya bilərsən. eager fetch zamanı bütün cari sütunları və bütün relation cədvəlləri fetch edib (dartıb) əvvəlcədən gətirir. bizə lazım olsa da olmasa da. biz işlətsək də işlətməsək də
+Lazy - a cədvəlindən get sorğusu çəkəndə a-ın içində olan relation olmayan sütunlar gələcək, relationlar (joinlər, digər cədvəllər) gəlməyəcək. ilk (əsas) sorğuda yalnız a cədvəlinin özü gələcək. Ən azından ilk dəfədən belə olacaq (sonra field-field çəkəndə relationlar da gələcək). Əgər digərlərini istəsək özümüz həmin relationlara sorğu göndərməliyik. yəni koddursa və tutaqkı student-in içindəki addressi gətirmək istəyiriksə student.getAddress() yazıb relationu özümüz gətirməliyik onda address cədvəlindən select çəkib gətirir. Deməli LAZY əsas cədvəli gətirir, relationları gətirmir. Bizə deyir ki, relationları istəsən özün sorğu edib (getter ilə) gətirərsən
+Eager - a cədvəlindən get sorğusu çəkəndə elə ilk (əsas) sorğudaca a-ın özünü də gətirir həmçinin a-ın içində olan bütün relationlardan (joinlər, digər cədvəllər) da select çəkib onları də gələcək, təbii ki hansının başına EAGER qoymusansa onlar gələcək. field field hərəsinə başqa bir şey qoya bilərsən. eager fetch zamanı bütün cari sütunları və bütün relation cədvəlləri fetch edib (dartıb) əvvəlcədən gətirir. bizə lazım olsa da olmasa da. biz işlətsək də işlətməsək də
 bəs bunlardan hansı məsləhət görülür? təbii ki LAZY, performansı nəzərətdə saxlamaq üçün. çünki biz misal üçün post cədvəlinin bir sətrini dartanda mütləq deyilki onun bütün relationlarını da dartaq, bəlkə heç bizə onlar lazım deyil? bəlkə elə təkcə misal üçün post.title sütunu bizə lazımdır?
-məsləhət görülürki, həmişə default LAZY qoyub, hansı yerdə ki bizə bütün relationlar lazımdır o zaman 2 üsul var ki, onu EAGER kimi edə bilərik, ya Entity Graph vasitəsilə, ya da Join Fetch vasitəsilə relationları darta bilərik
+məsləhət görülürki, həmişə default LAZY qoyub, hansı yerdə ki bizə bütün relationlar lazımdır və ya bəzi relationlar lazımdır, o zaman 2 üsul var ki, onu EAGER kimi gətirə bilərik, ya Entity Graph vasitəsilə, ya da Join Fetch vasitəsilə relationları darta bilərik
 
 n+1 problemi - n burda entity classımızda olan relationların sayıdır (yəni join elədiyimiz cədvəllərin sayı), 1 isə elə həmin entity-ni fetch edəndə gələn 1 sətir datadır. yəni 1 elə bizim indi olduğumuz entity classı, n isə həmin entity classının içində olan n dənə digər entity classın fieldləridir (digər relationlar). yəni n orda relation sayıdır, 1 isə bizim əsas cədvəlimizin 1 sətridir. n+1 odurki misal üçün bizdə 1 class var içində də 3 ədəd relation var, yəni n+1 edir 4. biz 1 sorğu gördərəndə o databaza üçün 4 sorğu olacaq, 4 ədəd select olacaq. 1000 sorğu edəndə 4000 sorğu. beləcə databazada yük artır və sorğu sayı artdıqca dözmür çökür. performans issue. sual: n+1 problemi hansı entity-də çıxmaya bilər? cavab: əgər entity-mizdə relation yoxdursa (yəni heç bir one-to-one, one-to-many, many-to-many yoxdursa) n+1 heç vaxt olmayacaq
 sual - n+1 problemi hansı fetching strategy-də çıxır? LAZY-də yoxsa EAGER-da? cavab: hər ikisində. LAZY-dədə çıxır, EAGER-də də çıxır. EAGER-də findById verən kimi dərhal bütün relationları gətirir. LAZY-də isə findById verən kimi tək 1 gətirir, amma kodda get digər bir relation yazanda (for example: entity.getComments()) başlayır o relationu da gətirməyə. demək EAGER-da avtomatik-dərhal n+1 problemi çıxır, LAZY-də isə biz get methodunu çağırıqca n+1-lər yaranacaq
 
 Hibernate BUG. one-to-one relationda biz hətta fetch = LAZY yazsaq belə özü standard Data JPA orda EAGER retrieve edir. Bu BUG aradan qaldırmaq üçün hibernate plugin aktivləşdirmək lazımdır: apply plugin: 'org.hibernate.orm'
 
-@JoinTable - misal üçün @ManyToMany relation-da bizə üçüncü bir cədvəl yaratmaq lazım olur. Onda biz @JoinTable annotation işlədirik
-@JoinTable(name = "students_courses", joinColumns = @JoinColumn(name = "student_id"), inverseJoinColumns = @JoinColumn(name = "course_id) )
+@JoinTable - yalnız @ManyToMany-də istifadə olunur, çünki @ManyToMany relation-da bizə üçüncü bir cədvəl yaratmaq lazım olur. Onda biz @JoinTable annotation işlədirik
+@JoinTable(name = "student_course", joinColumns = @JoinColumn(name = "student_id"), inverseJoinColumns = @JoinColumn(name = "course_id) )
 
 @ManyToMany(mappedBy = "courses") - mappedBy burda ona görə istifadə olunurki, əlavə cədvəl yaranmasın. Yəni @ManyToMany-də biz istəyirik 3 cədvələ yaransın. mappedBy qoymasaq 4 cədvəl yaranacaq. mappedBy-da hər iki entitydə yazmırıq, yalnız iki entity-dən birində yazırıq. Beləliklə birinci entity-də @ManyToMany() yazırıq, ikinci entity-də @ManyToMany(mappedBy = "courses") yazırıq
-mappedBy nədir? bidirectional entity-də qarşı tərəfdəki-entitydəki fieldin adını refer edir
+mappedBy nədir? bidirectional entity-də qarşı tərəfdəki-entitydəki fieldin adını refer edir. Yəni hansısa field-in başına misal üçün @ManyToMany(mappedBy = "courses") yazmışıqsa demək bunun qarşı tərəfdəki entity-də refer elədiyi fieldin adı "courses"-dir
 
 @OneToOne-da default EAGER-dir. bəs bilirikki EAGER bizə sərf eləmir. Biz @OneToOne-ı da istəyirik LAZY-yə dəyişək. Nə etməliyik? hə imenni @OneToOne-da bir incəlik var. orda Hibernate-də bug var, @OneToOne-da sən götürüb ora fetch = LAZY yazsan belə o onu dəyişmir, elə default EAGER olaraq da qalır. orda @OneToOne-ın default valuesini dəyişmək üçün əlavə hibernate plugin yükləməlisən
 bytecode enhancement
@@ -96,15 +96,17 @@ buildscript {
 apply plugin: 'org.hibernate.orm' (bu plugini apply edirik)
 hibernate {
 	enhance {
+	    // @OneToOne üçün əsas budur
 		enableLazyInitialization = true
+		// bu digər 3-ü optional. həqiqətəndə sənə lazımdırsa bunları işlət. hansı nə işə yarayır özün araşdır
 		enableDirtyTracking = false
 		enableAssociationManagement = false
 		enableExtendedEnhancement = false
 	}
 }
-bunu edəndə @OneToOne fecthing default EAGER idi, bunu bytecode səviyyəsində özü dəyişib LAZY edir
+bunu edəndə @OneToOne fetching default EAGER idi, bunu bytecode səviyyəsində özü dəyişib LAZY edir. buna bytecode enhancement deyilir.
 
-Hibernatedə biz hansı scriptləri ORM ilə edə bilsək ORM ilə edirik (findById), ORM ilə edə bilmədiklərimizi JPQL - Java Persistance Query Language ilə edirik, JPQL ilə edə bilmədiklərimizi ilə Native Query ilə edirik. Yəni ardıcıllıq belə gedir. JPQL ilə Native Query arasında fərq odurki JPQL-də scriptdə entity classının adını yazırıq və column olaraq entity classının field-lərini yazırıq, yəni java classda yazdığımız adları orda scriptdə istifadə edirik, Native Query-də isə scriptdə databazadakı cədvəlin adını yazırıq. Niyə elə hər yerdə Native Query yazmırıq, JPQL-ə üstünlük veririk? Çünki biz elə ORM-i niyə əvvəldən bəri məsləhət bilirik? boiler plate kodu aşağı salır və əsas da odurki appları gün gəlir bir databazadan başqa bir databazaya migrate etmək istəyirik, onda Native Query-lər bizə problem yaradacaq, Posgresql-dəki Native Query, Oracle-də işləməyə bilər, Oracle-da olan MySql-də. amma JPQL yazanda özü bütün databazalara özü adaptasiya olur
+Hibernatedə biz hansı scriptləri ORM ilə edə bilsək ORM ilə edirik (findById), ORM ilə edə bilmədiklərimizi JPQL - Java Persistance Query Language ilə edirik, JPQL ilə edə bilmədiklərimizi isə Native Query ilə edirik. Yəni ardıcıllıq belə gedir. JPQL ilə Native Query arasında fərq odurki JPQL-də scriptdə entity classının adını yazırıq və column olaraq entity classının field-lərini yazırıq, yəni java classda yazdığımız adları orda scriptdə istifadə edirik, Native Query-də isə scriptdə databazadakı cədvəlin adını yazırıq. Niyə elə hər yerdə Native Query yazmırıq, JPQL-ə üstünlük veririk? Çünki biz elə ORM-i niyə əvvəldən bəri məsləhət bilirik? boiler plate kodu aşağı salır və əsas da odurki appları gün gəlir bir databazadan başqa bir databazaya migrate etmək istəyirik, onda Native Query-lər bizə problem yaradacaq, Posgresql-dəki Native Query, Oracle-də işləməyə bilər, Oracle-da olan MySql-də. amma JPQL yazanda özü bütün databazalara özü adaptasiya olur
 
 // JPQL example
 @Query(value = "SELECT count(p.id) FROM PostEntity p")
@@ -119,60 +121,113 @@ List<String> findDistinctTitles();
 Long findPostsCountByTitle(String title);
 
 
-Hibernate Entity LifeCycle
-Transient - entity yaratmışıq amma hələ save etməmişik.
+Hibernate Entity LifeCycle (Entity States)
+There are 4 entity states: Transient, Persistent (Managed), Removed, Detached
+1.Transient - təzə entity yaratmışıq amma hələ save etməmişik, yəni bu təzə entity yalnız bizim kodumuzda var, hələ ki databazaya yoxdur bu məlumat, databazaya save edilmiyib
 var entity = new PostEntity();
 repo.save(entity) -> hələ bu sətir yazılmayıb. hələ databazaya düşməyib.
-Persistent (Managed) - save edəndə isə artıq bu statedə olur. databazaya məlumat düşdü. həmçinin burda sesiya yaranır deyə. misal üçün bir repo.save yazandan sonra repo.findById yazanda məlumatı artıq managed state-dən gətirir yəni sessiyadan gətirir databaza gedib gətirmir. həmçinin bizim işimiz bitəndə də sesiyanı özü bir növ commit edib bağlayır. yəni bir kodda son sətirdə entity.setName("Rovshan"); yazsaq (yəni bundan sonra repo.save(entity) yazmadan) özün bunu databazaya save edəcək, sessiya bitən zaman
-Removed - db-dən sətir siləndə bu state yaranır, bu statedə sətir silinən kimi hibernate sesiyanı dayandırır, kəsir ki, sən bundan sonra heç nə etməyəsən. repo.delete(entity) yazanda yaranan state. close session permamently.
-Detached - sesiyanı söndürmək, dayandırmaq (silmədən). misal üçün manageddə dedik ki, repo.findById yazanda məlumatı artıq sesisadan gətirir, databasedan gətirmir, bu Detached-də isə databazadan gətirir, çünki sesiyanı dayandırmışıq. close session temporarely. yəni bu sessiyanı nə vaxtsa yenidən managed stateyə qaytarmaq olur
+2.Persistent (Managed) - save edəndə isə artıq managed stateyə düşür, yəni databazaya məlumat düşdü. həmçinin burda sesiya yaranır deyə. misal üçün bir repo.save yazandan sonra repo.findById yazanda məlumatı artıq managed state-dən gətirir yəni sessiyadan gətirir databaza gedib gətirmir. həmçinin bizim işimiz bitəndə də sesiyanı özü bir növ commit edib bağlayır. yəni bir kodda son sətirdə entity.setName("Rovshan"); yazsaq (yəni bundan sonra repo.save(entity) yazmadan) özü bunu databazaya save edəcək, sessiya bitən zaman
+3.Removed - close session permamently. repo.delete(myEntity) yazanda entitimiz (myEntity) removed state-yə düşür, yəni hibernate özü sesiyanı removed state-yə keçirir, yəni sesiyanı həmişəlik dayandırır-qırır ki, sən birdən sonra nəsə myEntity.set() filan başqa şeylər etməyəsən deyə. db-dən sətir siləndə bu state yaranır, bu statedə sətir silinən kimi hibernate sesiyanı dayandırır, kəsir ki, sən bundan sonra heç nə etməyəsən.
+4.Detached - close session temporarely. sesiyanı müvəqqəti söndürmək, müvəqqəti dayandırmaq (silmədən). misal üçün manageddə dedik ki, repo.findById yazanda məlumatı artıq sesisadan gətirir, databasedan gətirmir, bu Detached-də isə databazadan gətirir, çünki sesiyanı dayandırmışıq. yəni bu sessiyanı müvəqqəti dayandırmışıq deyə nə vaxtsa yenidən managed stateyə qaytarmaq olur (detached state-dən managed state-yə keçmək üçün hibernate-nin merge adında methodu işə salınmalıdır. və ya repo.save yazanda onsuzda merge method avtomatik çağırılmış olur və detached state-dən managed state-yə keçilmiş olunur)
+Qeyd: methodun üstündə @Transactional annotation varsa demək ki, method başdan aşağa yalnız 1 sesiya üzərində işləyir. Yəni method başlayandan bitənə kimi sesiya açıq qalır. və sesiya bitəndə yəni method bitəndə Hibernete avtomatik olaraq sesiyanı bağlayır və sesiya zamanı edilən dəyişikliklər databazaya save edilir. hətta biz method içərisində deyək ki myEntity.setStatus(SUCCESS); yazmışıqda, amma repo.save(myEntity) yazmasaq belə hibetnate özün repo.save(myEntity) edir yəni myEntity-nin status sütunu dəyişilmiş olur. Diqqət edək bu yalnız methodun üstündə @Transactional annotation varsa belədir.
+
+public void test1(){
+     var myEntity = repo.findById(1L);      // Managed
+     myEntity.setStatus(SUCCESS);           // Detached
+     repo.save(myEntity);                   // Detached.merge -> Managed
+}
+
+@Transactional
+public void test2(){
+     var myEntity = repo.findById(1L);      // Managed
+     myEntity.setStatus(SUCCESS);           // Managed
+	 repo.save(myEntity);                   // Managed
+}
+
+Qeyd2: Biz bunları kodda özümüz tənzimləmirik. Hibernate istifadə edirik deyə Hibernate bunun hamısını özü edir. Amma yenə də biz arxada entity-lər necə işləyir onu başa düşməliyik. Biz kodu Hibernate-siz low-level yazsaydıq onda bu state-lərin hamısını özümü idarə etməli idik.
 
 
-n+1-in qabağını almaq üçün ilk olaraq həryerdə (daha doğrusu sonu ONE ilə bitən yəni defaultu EAGER olan relationlarda) fetch type LAZY qoyub, sonra əgər lazım olduqca relationları çəkmək:
-EntityGraph vasitəsilə, ya da JPQL Join Fetch vasitəsilə relationları darta bilərik. JPQL Join Fetch odurki Repository classında hansısa bir find methodunun yuxarısına özümüz JPQL ilə bir join script yazırıq və join sözündən sonra bir FETCH sözü də yazırıq. (misal: select * from orders o join Fetch order_item oi on o.id = oi.order_id)
-EntityGraph isə 2 üsulu var:
-1. Entity classının yuxarısına @EntityGraph() annotation qoy,  bura attribute paths ötürürük, hansı relationları EAGER FETCH ilə çəkmək istəyiriksə onları vergül ilə yazırıq. Bu o qədər də yaxşı yol hesab edilmir, çünki bəlkə sizə bir sorğuda bir relation lazım olacaq, digər bir sorğuda başqa bir relation? onda fərqli fərqli EntityGraph-lar qurmalısız, əlavə işlər görməlisiz
-2. Repository classında hansısa bir find methodunun yuxarısına @EntityGraph(attibutePaths = {"comments", "detail"} yazırıq, yəni 2 relation qoyuruq arrayın içərisinə. Bu zaman bu methodu çağıranda həmin 2 relation-u da join edib gətirəcək (yəni  EAGER FETCH). mütləq show-sql = true edib scriptlərə özün bax başa düş
+n+1-in qabağını almaq üçün ilk olaraq həryerdə (daha doğrusu sonu ONE ilə bitən yəni defaultu EAGER olan relationlarda) fetch type LAZY qoyub, sonra əgər lazım olduqca relationları çəkmək. EntityGraph vasitəsilə, ya da JPQL Join-lərin qabağına Fetch sözünü yazmaqla relationları darta bilərik. Bu hər iki üsulun məntiqi odurki normal EAGER nə edirdi? əlavə sorğular yaradırdı. n+1 probleminə gətirib çıxarırdı. Bu EntityGraph və ya Join FETCH isə əlavə sorğular yaratmır. Joinlərin vasitəsilə 1 sorğu əsasında digər relationları da gətirir. Yəni EAGER-in etdiyini edir, yəni relation-ları gətirir, amma databazaya n+1 sorğu ilə yox, sadəcə 1 sorğu ilə (join ilə). Necəki biz onsuzda native query ilə yazacaqdıqsa biz elə selectimizi join-lərlə yaazacaqdıq. Yəni həmin işi görür. Birdəki EntityGraph-da və ya FETCH Join-də özümüz qədər veririk ki, hansı relationları gətirsin, yəni mütləq deyil bu bütün relationları gətirə, orda özümüz yazırıq ki, hansı relationları gətirsin.
 
-EntityGraph-da öz type-si var. 2 tipi var: FETCH (default) and LOAD. Bu type nədir? biz EntityGraph ilə üzdəki n+1-i həll edirik, amma altdakı n+1 qala bilər. Yəni misal üçün biz yuxarıda dedik ki, comments və detail relationlarını da gətir. amma misal üçün comments-in də içində relationlar ola bilər, child entity-lərə də gətirir deyə rekursive şəkildə yenə də n+1 yarana bilər. Type-lar həmin o rekursive relationların FETCH tipini təyin edir. type = FETCH qoyanda, comments-in içindəki digər relationlara biz LAZY yazmışıqsa LAZY, EAGER yazmışıqsa EAGER dartacaq. amma type = LOAD qoysaq onda comments-in içindəki bütün relationları da EAGER dartır gətirir. Yəni FECTH biz yazdığımıza baxır, LOAD isə EAGER gətirir
+1.JPQL Join Fetch odurki Repository classında hansısa bir find methodunun yuxarısına özümüz JPQL ilə bir join script yazırıq və join sözündən sonra bir FETCH sözü də yazırıq. (misal: select * from orders o join Fetch order_item oi on o.id = oi.order_id). Burda əsas məsələ FETCH sözünü yazmaqdır, Joinin hansı join olmasının fərqi yoxdur, yəni Left Join Fetch də yazmaq olar, join fetch də yazmaq olar və s
+2.Digər bir üsul EntityGraph. EntityGraphın özünün isə 2 cür tətbiqi var:
+2.1. Entity classının yuxarısına @EntityGraph() annotation qoy,  bura attribute paths ötürürük, hansı relationları EAGER FETCH ilə çəkmək istəyiriksə onları vergül ilə yazırıq. Bu o qədər də yaxşı yol hesab edilmir, çünki bəlkə sizə bir sorğuda bir relation lazım olacaq, digər bir sorğuda başqa bir relation? onda fərqli fərqli EntityGraph-lar qurmalısız, əlavə işlər görməlisiz
+2.2. Repository classında hansısa bir find methodunun yuxarısına @EntityGraph(attibutePaths = {"comments", "detail"} yazırıq, yəni EAGER FETCH eləmək istədiyimiz relationları qoyuruq arrayın içərisinə. Bu zaman bu methodu çağıranda həmin 2 relation-u da join edib gətirəcək (yəni EAGER FETCH). mütləq show-sql = true edib scriptlərə özün bax başa düş
+3.Native Query yazmaq. Yəni özümüz join selecti yazmaq. Ən pis vəziyəttə bunu edirik. yəni 1 və 2-ci üsullar heç cür alınmırsa Native Query yazırıq
+
+EntityGraph-da öz type-si var. 2 tipi var: FETCH (default: type = EntityGraphType.FETCH) and LOAD. Bu type nədir? biz EntityGraph ilə üzdəki n+1-i həll edirik, amma altdakı-nested n+1 qala bilər. Yəni misal üçün biz yuxarıda dedik ki, comments və detail relationlarını da gətir. amma misal üçün comments-in də içində relationlar ola bilər, child entity-lərə də gətirir deyə rekursive şəkildə yenə də n+1 yarana bilər. FETCH Type-lar həmin o rekursive-nested relationların necə gətiriləcəyini təyin edir. type = FETCH qoyanda nested relationları gətirmir (yəni təkcə comments-in özünü gətirir), type = LOAD qoyanda isə comments-in içindəki digər relationlara biz LAZY yazmışıqsa LAZY, EAGER yazmışıqsa EAGER gətirir (yəni LOAD-da comments-in öz qaydaları ilə hərəkət edir)
 
 Beləcə EntityGraph normalda daha məsləhət görülür, amma yuxarıda dediyimiz kimi hətta relationların içində də digər relationlar varsa belə mürəkkəb datalar varsa, EntityGraph type ilə oynamaq lazım gələcəksə, belə hallarda EntityGraph yox elə JPQL Join Fetch işlədə bilərik, yəni find methodumuzun yuxarısına özümüz JPQL join scripti yaza bilərik
 
-EntityGraph bir növ EARGER dartır, amma əlavə sorğu yaratmadan. Yəni 1 select çəkir, joinlər köməyilə. Amma LAZY-də join istifadə olunmur, sorğuları tək tək çəkir, ona görə say çox olur. LAZY-də birinci dəfə təkcə əsas cədvəldən 1 select çəkir, sonra data retrive olunur onun içərisindən sən get edəndə başlayır əlavə sorğuları atmağa (tək-tək selectlər, joinsiz)
+EntityGraph və Join Fetch bir növ EAGER dartır, amma əlavə sorğu yaratmadan. Yəni 1 select çəkir, joinlər köməyilə. Amma normal EAGER və ya LAZY-də join istifadə olunmur, sorğuları tək tək çəkir, ona görə say çox olur. LAZY-də birinci dəfə təkcə əsas cədvəldən 1 select çəkir, sonra data retrive olunur onun içərisindən sən get edəndə başlayır əlavə sorğuları atmağa (tək-tək selectlər, joinsiz), EAGER-da isə o bütün əlavə sorğuları elə ilk dəfədən atır.
 
-cascade = ALL - cascade bizə ralationlarda lazım olur. Bizdə 3 relation varsa və insert into yazırıqsa demək normalda 3 ədəd insert into yazmalıyıq, amma cascade = ALL yazanda biz bir dəfə save methodunu çağırmaqla bu 3 cədvələ insert into edə bilirik.
-cascade 6 tipi var toplam: ALL, PERSIST, MERGE, REMOVE, REFRESH, DETACH
+Lazy-də demişdik .get() yazdıqca n+1 yaranır. yəni .get() yazanda görürdü ki, get eləmək istədiyim data yoxdur (select ilə databazadan çəkilməyib), ona görə gedib select edirdi, beləcə n+1 yaranırdı. EntityGraph və ya Join Fetch-də relationları artıq çəkib objectin içinə doldurduğuna görə .get() yazanda görür orda data var onu get edir. yəni artıq data var deyə gedib select çəkmir, beləcə n+1 yaranmır.
+Lazy-də əgər EntityGraph və ya Join Fetch istifadə etməmişiksə ilk öncə yalnız əsas entity-ni gətirirdi, onun içərisindəki relationları isə bir növ proxy kimi (mock kimi) gətirirdi, yəni real data gətirmirdi. nə vaxt həmin datanı .get() etsək onda görürdü ki, bu field artıq bizə lazımdır və bizdə yoxdur (mock-dadır), onda databazaya sorğu atıb o relation-un məlumatını gətirir.
+
+Cascade bizə ona kömək edir ki biz entity-lərimizi bir birinə calayıb hamısını biryerdə istifadə edə bilək. Yəni 1 dəfə repo.save() yazaq, n+1 dəfə yox. Misal üçün 1 entity və içərisində 2 relation varsa yəni toplam 3 entity varsa biz insert into edəndə 3 dəfə (3 fərqli cədvələ ayrı-ayrılıqda) insert yazmayaq, və ya delete etmək istəyiriksə 3 ədəd delete script yazmayaq. Cascade=ALL verib 1 scriptlə insert into, 1 scriptlə delete, 1 scriptlə update edə bilirik.
+
+cascade = ALL - cascade bizə relationlarda lazım olur. Bizdə 3 relation varsa və insert into yazırıqsa demək normalda 3 ədəd insert into yazmalıyıq, amma cascade = ALL yazanda biz bir dəfə save methodunu çağırmaqla bu 3 cədvələ insert into edə bilirik.
+cascade 6 tipi var toplam: ALL (bu qarşıda yazılanların hamısını əhatə edir), PERSIST (ancaq insert-lər calansın - biryerdə işləsin), REMOVE (ancaq delete üçün), DETACH (sesiyanı müvəqqəti dayandırır), MERGE (sesiyanı aktivləşdirir - bir növ detach-in əksi), REFRESH (sesiya daxilində sadəcə özünü yeniləyir refresh edir)
+Bunların ayrı-ayrılıqda mənası bilmək lazımdır, amma real praktikada Cascade=ALL yazıb keçirik. Onsuzda Hibernate bunu özü idarə edir. ALL-da yeganə risk Delete (Remove) əməliyyatında baş verir, ona da göz yumuruq. Ya da daha dəqiq olsun deyə xırdalığa gedib Cascade=ALL yox Cascade=[PERSIST,MERGE,REFRESH,DETACH] yaza bilərik.
 
 @ToString.Exclude
-relation fieldlərimiz yuxarısına həmçinin bunu da yazırıq ki, misal üçün kodda log.info(postEntity) verəndə də postEntity-in içərisində gedib relationları çəkib gətirməsin, yəni n+1 yaratmasın
+relation fieldlərimiz yuxarısına həmçinin bunu da yazırıq ki, misal üçün kodda log.info(postEntity) verəndə və ya sout(postEntity) yazanda postEntity-in içərisində gedib relationları çəkib gətirməsin, yəni n+1 yaratmasın
+Çünki biz n+1-dən qaçmaq üçün hərşeyi LAZY edirik, amma LAZY demişdikki özü də n+1 yarada bilər, əgər əsəs entity-in içindəki relation-u get() etsək orda databazaya əlavə sorğu yaranacaq. və elə log.info(postEntity) edəndə gedib bir bir bütün field-ləri get() edir və LAZY-in olmasına baxmayaraq yenə də n+1 problemi yaratmış olur
 sonra hibernatedə də entity classın içərisində olan digər relationları ToString edib loglamaq olmaz, n+1 probleminə gətirib çıxarır, və ya orda relation varsa hətta @OneToMany relation varsa demək orda List data var yenə də List datanı loglamaq bad practise-dir performans issue yaradır.
 
-1 ədəd save yazıb istəyəndə ki bütün relationları həmin o 1 ədəd save methodunun (yəni cascade = ALL ilə) vasitəsilə save edək, onda əgər unidirectional relationumuz varsa (yəni bir classda relation vermişiksə, amma digər  classda həmin relationu yazmamışıqsa) onda save methodu işləmir, xəta verir. open-in-view = false yazmışdı onu silmək lazım idi ki işləsin və ya savePost methodunun yuxarısına @Transactional annotation qoysaydıq onda işləyəcəkdi
-open-in-view = true by default. bu o deməkdirki spring JPA özü sessiyanı başdan sona yəni controllerdən son save methoduna kimi və hatta ondan sonra da təzdən controllerə qayıdıb response verənə kimi sessiyanı açıq saxlayır, (bunu fəsadı performansedir. pisdir), amma hansı ki bizə sessiya əslində sadəcə databazaya yazanda və ya databazadan məlumat oxuyanda lazım idi. ona görə open-in-view = true pisdir. çox vaxt open-in-view = false edirik. OSIV filter antipattern araşdır. amma bir şey də var ki, bu open-in-view = false layihəni başlayanda lap əvvəldən etmək lazımdır, tutaqki layijə 2 ildir yazılır, çoxlu kod var, default open-in-view = true olub, indi siz götürüb open-in-view = false yazsaq, orda kodda relation olan yerlərdə çox şey qırılacaq, siz bir bir o problem çıxan yerləri düzəltməlisiniz. burda bir biclik var ki, biz open-in-view = false eləyəndə hansısa bir kod qırıldısa o hissəni düzəltmək üçün həmin methodun üzərinə @Transactional annotation qoyub problem həll edə bilərik, amma bu pis üsuldursa o ancaq həmin methodu düzəldəcək, digərlərini yox. Onda belə çıxır biz bir bir bütün methodlarımızın üzərinə @Transactional annotation qoymalı olacayıq.
+open-in-view - spring jpa-dan gəlir. class spring.jpa.open-in-view yazılır. 1 ədəd save yazıb istəyəndə ki bütün relationları həmin o 1 ədəd save methodunun (yəni cascade = ALL ilə) vasitəsilə save edək, onda əgər unidirectional relationumuz varsa (yəni bir classda relation vermişiksə, amma digər  classda həmin relationu yazmamışıqsa) onda save methodu işləmir, xəta verir. open-in-view = false yazmışdıq (yəni transaksiyanı qırmışdıq-məhdudlaşdırmışdıq) onu silmək lazım idi ki işləsin (çünki siləndə default olaraq open-in-view = true götürür) və ya savePost methodunun yuxarısına @Transactional annotation qoysaydıq onda işləyəcəkdi
+open-in-view = true by default. bu o deməkdirki spring JPA özü sessiyanı başdan sona yəni controllerdən son save methoduna kimi və hatta ondan sonra da təzdən controllerə qayıdıb response verənə kimi sessiyanı açıq saxlayır, (bunu fəsadı performansedir. pisdir), amma hansı ki bizə sessiya əslində sadəcə databazaya yazanda və ya databazadan məlumat oxuyanda lazım idi. ona görə open-in-view = true pisdir. çox vaxt open-in-view = false edirik. OSIV filter antipattern araşdır. amma bir şey də var ki, bu open-in-view = false layihəni başlayanda lap əvvəldən etmək lazımdır, tutaqki layihə 2 ildir yazılır, çoxlu kod var, default open-in-view = true olub, indi siz götürüb open-in-view = false yazsaq, orda kodda relation olan yerlərdə çox şey qırılacaq, siz bir bir o problem çıxan yerləri düzəltməlisiniz. burda bir biclik var ki, biz open-in-view = false eləyəndə hansısa bir kod qırıldısa o hissəni düzəltmək üçün həmin methodun üzərinə @Transactional annotation qoyub problem həll edə bilərik, amma bu pis üsuldurda o ancaq həmin methodu düzəldəcək, digərlərini yox. Onda belə çıxır biz bir-bir bütün methodlarımızın üzərinə @Transactional annotation qoymalı olacayıq.
+
+open-in-view=false edirik ki, performans tərəfdən qabağa düşək, amma indi də sesiya yalnız databazaya müraciət edəndə açılır-bağlanır, digər yerlərdə sesiya olmur deyə kodda həmin hissələrdə nəsə xəta olanda rollback etmir kodu. axı sesiya yoxdur. Ona görə də orda da sesiya olsun deyə methodun başına @Transactional qoymalı oluruq ki, bu da əslində yaxşı həll deyil, levi həldir.
+
+belə başa düşmək olar ki, open-in-view=true ilə methodun üzərinə @Transactional annotation qoymaq oxşar şeylərdir hər ikisi sesiyanı proses bitənə kimi açıq saxlayır. sadəcə @Transactional annotation yalnız bir methoda tətbiq olunur, amma open-in-view=true bütün appa aid olur.
+
+open-in-view=true olur default olaraq, bu o deməkdirki databazada ilə işləmək üçün spring özü default olaraq sesiyanı açıq saxlayır. open-in-view=true olanda ta ki view-dan (yəni MVC-də view vardı ha, yəni UI kimi başa düşə bilərik), yəni ta ki sorğu request göndəriləndən controller-ə, service-ə, entity-ə, databazaya gedib çatana hələ ordan da cavab qayıdıb istifadəçiyə response qayıdanda kimi hiberbate sesiyanı açıq saxlayır.
+
+open-in-view app based bir şeydir, yəni hansısa methoda-classa aid bir şey deyil bütöv ms-ə aiddir. gərək elə ən başdan ms-i yazanda open-in-view=false yazasan elə ilk gündən. Bunu sonradan edəndə gərək bütün kodu başdan test edəsən transactiyalar sesiyalar qırılanda rollback əməliyyatlarını bir bir tətbiq edəsən. çox ağrılı bir prosesdir.
+
+unidirectional @ManyToMany @Transactional annotation və ya open-in-view=true olanda işləyir, open-in-view=false @Transactional annotation olmayanda işləmir. və ya əks halda gərək onu bidirectional edəsən. işləməmə səbəbi odurki, çünki unidirectional olanda və open-in-view=false olanda @ManyToMany-də olan digər relation entity-ni managed state-də saxlamır, əksinə detached state-də saxlayır, yəni onun sesiyasını müvəqqəti söndürmüş olur, nəticədə sən 1 script yazaraq insert into etmək istəyəndə işləmir, çünki detached state-də olan həmin entity-ni insert edə bilmir. Deməli @ManyToMany-də 1 ədəd save yazaraq hər iki (üç) cədvələ insert etmək istəyirsənsə bütün sesiyanı açıq saxlamalısan yəni managed statedə olmalısan bunun üçün də open-in-view=true olmalıdır və ya methodun başında @Transactional annotation olmalıdır.
+
+Pagination
+JPA-da pagination aktivləşdirmək üçün
+1. Repository interface-yə JpaRepository onsuzda extends edirdik, indi həmçinin JpaSpecificationExecutor<MyEntity> interface-ni də extends edirik
+2. Sonra bir class yaradırıq və həmin class həmin Entity-mizin pagination kriteriyalarını yazmaq üçün. class PaymentSpecification implementats Specification<PaymentEntity>. Sonra həmin classda PaymentCriteria paymentCriteria adında field yazırıq.
 
 
 Optimistic lock, pessimistic lock
-1. Optimistic lock - yalnız bir sətri (row) locklayır, yalnız 1 row. Cədvələ yeni bir column əlavə edirik. Tutaq ki adı olsun version (bigint datatype). Burda data type olaraq version long da ola bilər, modification_date timestamp da ola bilər və s.
+1. Optimistic lock - bu locking məsləhətlidir. pessimistic lock isə əksinə məsləhət deyil. Optimistic lock bir növ isolation leveli kodda repetable read-ə qaldırmaqdir. yəni eyni id üzrə eyni zamanda birdən çox sorğu gələrsə bunu tətbiq etməliyik. multithreadlərdə buna paralel threadlərdən söhbət gedir. Optimistic lock repetable read-dənsə bu yaxşıdır. repetable read eyni anda həmin methoda girməyi locklayır, istənilən (bütün) id üzrə. Optimistic lock isə ancaq eyni id-li sorğularda locklayır.
+
+yalnız bir sətri (row) locklayır, yalnız 1 row. Hansı entity-ni locklamaq istəyiriksə həmin Entity cədvəlimizə yeni bir column əlavə edirik. Tutaq ki adı olsun version (databazada bigint datatype qoyuruq çox vaxt). Burda data type olaraq version long da ola bilər, modification_date timestamp da ola bilər və s. Hansı prinsiplə locklayır? Datanı-databaza sətrini nə vaxt update eləmək istəsək gedib versiyasına baxır, versiya düz gəlmirsə update eləmir. Bu default olaraq "update"-dir (LockModeType.OPTIMISTIC_WRITE). Bunu dəyişib "get-select"-də edə bilərik ki, select-lər zamanı versiya checking eləsin, versiya düz gəlmirsə get eləməsin. ((LockModeType.OPTIMISTIC_READ))
+
 @Version
 private Long version;
-Bunu qoyanda eyni anda eyni 1 sətrdə 2 fərqli tranzaksiya əgər istəsə ki sətrdə nəyisə update eləsin, baxır ki versiyaları düz gəlmir, onda ikinciyə xəta verir (ObjectOptimisticLockingFailureException). O xətanı da biz özümüz try catch-da tutub istədiyimiz əməliyyatı edə bilərik. Tutaqkı ora kod yaza bilərik ki exception throw eləsin ki misal üçün "zəhmət olmasa təkrar yoxlayın", və ya catch hissədə repo.save() yazıb edə bilərikki həmin tranksiyaza da accept olsun və ya @Retryable annotation qoşa bilərik. Bu bizim biznes tərəfin qərarı ilə tənzimlənir
-burda bir növ məntiqi olaraq kodda transaction isolation level-də @Transactional(repetable read) etmiş oluruq. bəs niyə o qədər yaxşı deyil, bu yaxşıdır? çünki orda qoyrusane methodun başına, amma o hadisə olanda rollbackı özün logici tam idarə edə bilmirsən, version-a filan databazada baxa bilmirsən
+bunu edəndə həmin id üzrə nə zaman databazaya update getsə version-u autoincrement edir. yəni 1 vahid artırır.
+Bunu qoyanda eyni anda eyni 1 sətrdə 2 fərqli tranzaksiya əgər istəsə ki sətrdə nəyisə update eləsin, baxır ki versiyaları düz gəlmirmi, düz gəlmirsə ikinciyə xəta verir, exception atır (ObjectOptimisticLockingFailureException). O xətanı da biz özümüz try catch-da tutub istədiyimiz əməliyyatı edə bilərik. Tutaqkı ora kod yaza bilərik ki exception throw eləsin ki misal üçün "zəhmət olmasa təkrar yoxlayın", və ya catch hissədə repo.save() yazıb edə bilərikki həmin tranksiyaza da accept olsun və ya @Retryable annotation qoşa bilərik. Bu bizim biznes tərəfin qərarı ilə tənzimlənir
+burda bir növ məntiqi olaraq kodda transaction isolation level-də @Transactional(isolation = repetable_read) etmiş oluruq. bəs niyə o qədər yaxşı deyil, bu yaxşıdır? çünki orda qoyursane methodun başına, amma o hadisə olanda rollbackı özün logici tam idarə edə bilmirsən, version-a filan databazada baxa bilmirsən
+LockModeType: OPTIMISTIC_READ - select-ə (get-ə) icazə verir amma update-ni locklayir, OPTIMISTIC_WRITE - həm select zamanı həm də update zamanı locklayır, OPTIMISTIC_FORCE_INCREMENT - versiyanı 2 ədəd artırır.
 
 2. pessimistic lock - bütöv bir cədvəli (table) locklayır. məsləhət görülmür bu. çünki gec işləyir. latency yaradır
-burda bir növ məntiqi olaraq kodda transaction isolation level-də @Transactional(serializable) etmiş oluruq
+burda bir növ məntiqi olaraq kodda transaction isolation level-də @Transactional(isolation = serializable) etmiş oluruq
 bunun 2 növü var, pessimistic_read: oxumağa icazə var (get), amma yazmağa yox, pessimistic_write: (həm oxumağa, həm də yazmağa icazə yoxdur)
 bunu kodda necə edirik? repository interfacemizdə olan methodun (misal üçün findById) başına annotation qoyuruq
-@Lock(LockModeType.PESSIMISTIC_READ) və ya PESSIMISTIC_WRITE, PESSIMISTIC_FORCE_INCREMENT qoyuruq. PESSIMISTIC_FORCE_INCREMENT versiyanı 2 ədəd artırır. bir növ double check etmək üçün. çünki guya biz repo.save() edərik burda versiya 1 ədəd artmış olar, ondan sonra kodda yenə başqa sətirlər yazarıq, sonra yenə repo.save() yazarıq, onda PESSIMISTIC_FORCE_INCREMENT bizə lazım olacaq ki, 2 dəfə increment eləsin
+@Lock(LockModeType.PESSIMISTIC_READ) və ya PESSIMISTIC_WRITE, PESSIMISTIC_FORCE_INCREMENT qoyuruq. PESSIMISTIC_FORCE_INCREMENT versiyanı 2 ədəd artırır. bir növ double check etmək üçün. çünki guya biz repo.save() edərik burda versiya 1 ədəd artmış olar, ondan sonra kodda yenə başqa sətirlər yazarıq, sonra yenə repo.save() yazarıq, onda PESSIMISTIC_FORCE_INCREMENT bizə lazım olacaq ki, 2 dəfə increment eləsin. amma repo.save() 1 dəfə yazırıqsa buna ehtiyac yoxdur.
 
 senior interview question: bir transaction(REPETABLE_READ) qoysaq onda optimistic_lock-un gördüyü işi görmüş olacayıq. Harda hansını istifadə edək? Niyə optimistic lockun performansı qismən də olsa daha yaxşı olacaq?
 cavab: 1-cisi - optimistic lock-u exception ilə tutub biznesə uyğun olaraq istədiyimiz əməliyyatı edə bilərik, 2 - optimistic lock versiya checking-i nə vaxt eləyir? kodda yalnız save yazılan hissədə. amma REPETABLE_READ transactiyası qoysaq method fully həmisə isolated olaraq icra edilir, yəni sırf sətri fullu locklayır, getlərdə də save-lərdə (insert-lər) də (prosesi 1 sətir üçün eyni anda yalnız bir ədəd transaksiyaya endirir). misal üçün user1 və girib eyni sətri get edib baxmaq istəsə, user2 də eyni sətri get edib baxmaq istəsə. optimistic lock burda get-ləri locklamır deyə hər iki user eyni anya transaksiyanı yerinə yetirə biləcək. amma REPETABLE_READ qoysaqdıq bu 2 user bu əməliyyatı tək-tək etməli olacaqdı, bu transaksiyalar paralel getməyəcək, ardıcıl gedəcək
 
+sual: isolation leveli REPETABLE_READ-ə artırmmaq icazə verilmir. amma sən elə etməlisən ki, eyni anda gələn sorğuları handle edəsən. Nə etmək olar?
+cavab: həmin əməliyyatı queue-lərə keçirmək. queue-dən oxuyanda istər istəməz millisaniyə ilə də olsa fərqli-fərqli vaxtlarda oxuyacayıq. yəni concurency problemini həll etmiş olacayıq. (elə bankların çoxu bu yolu işlədir, isolation leveli dəyişməkdənsə, message broker işlədir)
+ümumiyyətlə əgər nəyisə asinxron-a çıxarmaq mümkündürsə onu asinxron-a çıxar. sinxrondan daha yaxşı işləyəcək performans baxımından.
+
 həmçinin non-repetable read problemini manual olaraq özümüz həll etmək istəsək select for update buraxırıq. onda manual özümüz update etmiş oluruq datanı. select for update - variablenin state-ni başlayır izləməyə. son dəyəri götürür.
 select for update - variablenin state-ni başlayır izləməyə. son dəyəri götürür. non-repetable read problemini manual olaraq özümüz həll etmək istəsək select for update buraxırıq. onda manual özümüz update etmiş oluruq datanı
 
-Hibernate caching: L1, L2 caching
-L1 - default enable = true. əgər eyni sorğular eyni sesiyanın daxilindədirsə L1 caching işə düşür və eyni sorğular üçün databazaya yalnız 1 ədəd sorğu (select) gedir
-L2 - default enable = false
+Spring boot internal caching - L1, L2
+External caching - Redis (default port 6379). Redis key-value məntiqi ilə işləyir. özü NoSQL databazadır
+cache nə zaman istifadə oluna bilər? Misal üçün bizim sorğumuz pulludursa. Misal üçün Asana sorğu gedir və ya kredit bürosuna sorğu gedir. Eyni müştəri üçün eyni servisi gündə 10 dəfə çağırmağın mənası qalmır, boşuna pul yazır. Ondansa ilk sorğunu həqiqətən də third-party-yə göndərib, sonrakıları cache-dən gətirmək olar.
+Spring boot internal cache. Hibernate caching: L1, L2 caching (bunlar hər ikisi sırf get sorğuları keşləyir) (işləməsi üçün main classda @EnableCaching yazmalıyıq). L1 və L2 caching Hibernate-nindir, yəni JDBC, Mybatis və digərlərində L1,L2 yoxdur.
+L1 - default enable = true. əgər eyni sorğular eyni sesiyanın daxilindədirsə L1 caching işə düşür və eyni sorğular üçün databazaya yalnız 1 ədəd sorğu (select) gedir. L1 keş 1 sesiyanı keşləyir.
+L2 - default enable = false.  L2 keş multiple sesiyaları keşləyir (regionları keşləyir)
 
 methodun içində repo.save() yazanda biz transaksiya-sesiya yaratmış oluruq, proseslər eyni sesiyanın içində gedir.
 və ya methodun başına @Transactional annotation qoyanda transaksiya-sesiya yaratmış oluruq, proseslər eyni sesiyanın içində gedir.
@@ -189,16 +244,18 @@ public void test(){
 	var account1 = repo.findById(1L).get();
 }
 
-sonra burda bir tricky məsələ var ki, əgər methodun başına @Transactional annotation qoymuşuqsa onda ən sonra repo.save() yazmasaq belə sesiya bitəndə yəni method bitəndə özü save edir, yəni autocommit edir
+sonra burda bir tricky məsələ var ki, əgər methodun başına @Transactional annotation qoymuşuqsa onda ən sonda repo.save() yazmasaq belə sesiya bitəndə yəni method bitəndə özü save edir, yəni autocommit edir. çünki @Transactional annotation qoyanda sesiya yaranır və hibernate ən sonda sesiyanı commit edir
+
 @Transactional // yəni burda özü save edir - balansın üzərinə 44 gəlmiş olur
 public void test(){
 	var account = repo.findById(1L).get();
 	account.setBalance(BigDecimal.valueOf(44));
 }
+əgər bir methodun başında @Transactional annotation varsa və methodun içində repo.save() yazmışıqsa və ondan sonra da nəsə başqa kodlar yazmışıqsa, repo.save() hələ transaksiyanı bağlamır @Transactional var deyə hələ də bütün method 1 transaksiyada qalır, yəni repo.save()-dən sonra yazdığımız kodlar belə eyni transaksiyanın içində gedir, yəni əgər hansısa bir sətirdə exception baş versə (fərqi yoxdur repo.save()-dən əvvəl və ya sonra) bütün method rollback olacaq
 
-L2 - default enable = false. real olaraq çox istifadə olunmur. ondansa cashing-i redis-lə filan etmək olar
+L2 - default enable = false. real olaraq çox istifadə olunmur. ondansa caching-i redis-lə filan etmək olar
 L2 yandırmaq üçün caching provider verməliyik, misal üçün ən məşhuru EHcache, sonra Infinispan, and Caffeine, JBoss, Hazelcast və s. Bunlar library-dir dependency kimi gradle və ya pom.xml-ə əlavə edirik. L1-də biz 1 sessiya (avtomatik 1 method) içərisində keşləyirdiksə, L2-də bir multiple sesiyalar (multiple methods) içərisində keşləyirik. yəni repo.findById(1L).get(); 1 methodda yox, 5 methodun içində yazsaq onların hamısını keşdən gətirəcək, databazadan yox.
-Burda sisiyalara REGION-lar veririk. misal üçün REGION A, REGION B və s. tutaqkı 5 dənə methodun başına REGION A yazırıq, bunların sesiyaları hamısı biryerdə keşlənmiş olur, sonra hansı methodun başına REGION B yazsaq onların sesiyaları hamısı bir keşlənmiş olur
+Burda sesiyalara REGION-lar veririk. misal üçün REGION A, REGION B və s. tutaqkı 5 dənə methodun başına REGION A yazırıq, bunların sesiyaları hamısı biryerdə keşlənmiş olur, sonra hansı methodun başına REGION B yazsaq onların sesiyaları hamısı bir keşlənmiş olur. Bu REGION-lar aydın məsələdir ki, yaddaşda yer tutmuş olur. Bunlar özü silinmir. Lazım olmadıqca özümüz silməliyik. TTL deyirlər ona. Time to Leave. TTL yoxdur bunlarda. özün silməlisən. Job yazıb silirik çox vaxt. Misal üçün  1 həftədənbir silinsin və s.
 dedik L2 cachingin etdiyini redis də edə bilir, hətta yaxşı olar ki, elə redislə edək. interview-da soruşula bilər ki, bir app var orda L2 caching seçilib, qəsdən Redis seçilməyib. Niyə? Cavab: sürətə görə. L2 caching Hibernate-in özündən gəlir deyə daha sürətlidir. Redis isə nə qədər möhtəşəm sürətli bir keşləmə olsada istər istəməz onu özümüz qoşuruq, network-connection məsələləri var ona görə L2-dən gec işləyir
 
 bunu application properties-ə qoyuruq
@@ -211,6 +268,7 @@ bunu entity class-a qoyuruq
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Foo {
 
+@Cacheable annotation proxy design pattern ilə işləyir. Burdan avtomatik başa düşməliyik ki, @Cacheable-ı hansı methodlara tətbiq edə bilməyəcəyik? 1.private methodlara. 2.eyni bean-dən çağırılan methodlara. Yəni eyni bean daxilində işləmir. Fərqli classdan (bean-dən) çağırılmalıdır.
 
 Cache Concurrency Strategy
 Based on use cases, we’re free to pick one of the following cache concurrency strategies:
@@ -219,3 +277,66 @@ READ_ONLY: Used only for entities that never change (exception is thrown if an a
 READ_WRITE: This strategy guarantees strong consistency, which it achieves by using ‘soft’ locks. When a cached entity is updated, a soft lock is stored in the cache for that entity as well, which is released after the transaction is committed. All concurrent transactions that access soft-locked entries will fetch the corresponding data directly from the database.
 NONSTRICT_READ_WRITE: Cache is updated after the transaction that changed the affected data has been committed. Thus, strong consistency isn’t guaranteed, and there’s a small time window in which stale data may be obtained from the cache. This kind of strategy is suitable for use cases that can tolerate eventual consistency.
 TRANSACTIONAL: Cache changes are done in distributed XA transactions. A change in a cached entity is either committed or rolled back in both the database and cache in the same XA transaction.
+
+Spring boot internal cache - Query cache (L3 cache). pod cache. yalnız 1 podu keşləyir
+Query cache - yalnız 1 pod daxilində keşləyir. yəni hər pod üçün eyni şeyi təkrar-təkrar keşləyir. Pod sayı qədər keş yaradır
+L1 və L2 sırf Hibernate-nin keşidir (bunlar da yalnız 1 podu keşləyir)
+Query cache isə Hibernate + Spring boot
+Query cache üçün methodun başına @Cacheable("yourCacheName") annotation qoyuruq. burda methodlar keşlənir və methodun qaytardığı obyekt keşlənir. və bir növ hashmap bucket-lər kimi keşlənir.
+bu keş bir növ methodun inputunda göndərdiyimiz dataya görə keşləyir, bir növ hashmap kimi. misal üçün input long id idisə, id=1 olanda onu 1 dəfə databazadan gətirir onu hashmap-da keşləyir, indidən sonra id=1 sorğularını keşdən gətirəcək, amma id=2 sorğusu gəlsə onu databazadan götürür yenə də keş hashmap-a yığır, indidən sonra id=2 sorğularını da keşdən gətirəcək. demək eyni inputa görə eyni outputu keşləyir. hashmap məntiqində key bizim input, value isə bizim output olacaq. input və output da burda istənilən datatype ola bilər. istənilən class da ola bilər. output misal üçün istənilən bir DTO ola bilər, istənilən bir entityClass ola bilər, bigDecimal ola bilər, ümumiyyətlə istənilən bir şey ola bilər.
+keş nə vaxt silinməli və ya update olunmalıdır?
+keşlədiyimiz data update olanda hərdəfə keşi ya update etməliyik ya delete etməliyik.
+keşi full təmizləmək istəyiriksə bunun üçün isə @CacheableEvict() annotation istifadə edirik. nümunə: @CacheableEvict(value = "yourCacheName", allEntries = true). bunu misal üçün hansısa bir schedule joba qoşa bilərik. misal üçün gündə 1 dəfə.
+keşi event based update etmək (yəni hansısa bir əməliyyat baş verəndə update etmək istəsək - bir növ trigger kimi) istəsək @CachePut("yourCacheName") istifadə edirik.
+yəni
+@GetMapping() methodlarında @Cacheable("yourCacheName")
+@PutMapping() methodlarında @CachePut("yourCacheName") - (CachePut - adətən event based çağırılır və databazada datanı update edəndə keşi təmizləmək istifadə olunur)
+@DeleteMapping() methodlarında @CacheEvict("yourCacheName") - (CacheEvict - adətən job vasitəsilə çağırılır və keş-dəki bütün datanı silmək üçün istifadə olunur)
+istifadə edirik.
+Cache adlarını Enum və ya ConstantClass-lar yaradıb veririk, yəni belə "yourCacheName" string kimi vermirik.
+eyni datanı fərqli keşlərə də keşləyə bilərik.
+@Cacheable("yourCacheName") burda input arraydır, vergüllə başqa keşName də yaza bilərik, onda eyni məlumatı 2 keşdə keşləyəcək. bəzən bu da lazım olur. sonra bir keşi təmizləyirsən digərini saxlayırsan və s.
+
+NoSql databaza tipləri: Key-value (Redis), Graph (Neo4J), Document Oriented (MongoDB)
+
+External cache - Redis cache. centerilized cache. bütün appı keşləyir yəni bütün podları. Mənfi cəhəti sürət. latency. redis özü bir no-sql databazadır deyə orda qoşulma var. network-connection problems (istənilən internal cache istənilə external cache-dən daha gec işləyir - network məsələsinə görə. Yəni redis əslində öz-özlüyündə çox sürətli işləyir, sadəcə internal cache-lə müqayisədə sürətdə geri qalır)
+Redis - external caching.(Redis default port: 6379) keşlər sistemi çox sürətləndirir. Nə vaxt keşləmək imkanın varsa keşlə. Çünki keşdən oxumaq çox sürətlidir, RAM-dan diskdən, databazadan oxumaq orda network-connection məntiqi var deyə keşlə müqayisədə çox gec işləyir. Həm də ki sistemimizdə ən çox qeydinə qaldığımız yer databaza olmalıdır, ən lightweigt databazanı saxlamalıyıq.
+
+ən məşhur external caching Redisdir. Başqa nələr var? Hazelcast, Tarantul
+Redis özü NoSQL databazadır.
+
+Redis mənfi cəhəti:
+1. Network, connection məsələlərinə görə cuzi ləngimə verə bilər.
+
+Hansı datanı-obyekti Redisə ilə keşləməyə bilməmiz üçün həmin data-obyekt mütləq Serializable-ni implements etməlidir. Serialization niyə edirik? versiya veririk. versiyanı qabaqcadan özümüz veririk. Əgər bunu etməsək bunu Java özü bir random long versiya verəcək, və gələcəkdə həmin classa bir field artırmaq (və ya silmək) istəsək bunu edə bilməyəcəyik, çünki bu dəfə də Java ona başqa bir versiya verəcək və bizim köhnə versiyamız ilə təzə versiyamız eyni olmadığına görə classı Serialization DeSerialization etmək mümkün olmayacaq. Amma versiyanı özümüz veririk deyə classdan istənilən bir field əlavə edilsə (və ya silinsə) versiya yenə də eyni qalacaq və heç bir problem yaşanmayacaq.
+
+Nəyi keşləyək? nəyi yox?
+hərşeyi keşləmək olmaz. gec-gec yenilənən-update olunan və tez-tez access olunan (get) dataları keşləməliyik. temporary-limitli yaşayan dataları keşləyə bilərik (misal üçün access token). pullu olan servisləri keşləyə bilərik. time to leave (TTL) rule olan dataları da keşləməliyik. Bu datanı axır başı onsuzda siləcəyik (TTL var deyə), ona görə heç elə əvvəldən databazada saxlamağın mənası yoxdur
+Necə bilək ki, keşimiz bizə fayda verir yoxsa ziyan?
+cache hit rate and miss rate deyə bir şey var. yəni keşlədiyimiz məlumat neçə dəfə keşdən oxunub, neçə dəfə isə databazanın özündən oxunub. həmin keş hitə baxıb bilə bilərik. Əgər biz hərdəfə gedib keşə baxırıq və orda məlumatı tapmayıb sonra gedib databazaya baxırıq, ta ondan keşin nə faydası olduki?!
+Redis keşing-də hər ms-də keş prefix qoyuruq ki, override olunmasın, hər ms-in keşi eyni olsun. misal üçün ms-1 də userId keşdə saxlaya bilər ms-2 də. bir onları eyni key ilə keşə yazmırıq ki data override olunmasın. biz keşə ms-1-userId və ms-2-userId keyləri ilə yazırıq.
+
+Datanı nə zaman keşləməliyik?
+1. Data gec-gec update olursa onu mütləq ki, keşləməliyik
+2. Data ara-sıra update olursa onu çox güman ki, keşləməliyik
+3. Data tez-tez update olursa onu keşləməməliyik
+4. Ömrü olan bir datanı keşləyə bilərik. Misal üçün AccessToken. 10 dəqiqəlik bir tokendir, 10 dəqiqə sonra silinəcək. bunu databazaya yazmağın və ordan oxumağın mənası yoxdur. Bunu birbaşa keşə yazıb orda oxuya bilərik. Onsuzda 10 dəqiqə sonra silinəcək və təzə token veriləcək, onu da eyni qaydada keşə yazacayıq və oxuyacayıq.
+5. Bizim app daha çox read eləyirsə, biz o datanı write zamanı keşləməliyik (yəni appda load hansı tərəfdə azdırsa orda keşlə).  Misal üçün user permissions. data databazaya insert olunan zaman, həmçinin də asinxron olaraq yazılır keşə
+6. Bizim app daha çox write eləyirsə, biz o datanı read zamanı keşləməliyik. Misal üçün FrontEnd page (hərdəfə dəyişilir)
+7. Dedik ki, appda load hansı tərəfdə azdırsa orda keşlə. Yəni Get sorğular azdırsa Get-də, Post sorğular azdırsa Postda keşlə. Amma elə sorğu olar bilər ki heç orda Post yoxdur. Misal üçün Asandan bir data çəkirsən. Onda elə məcbursan Get-də keşləyəsən, çünki onsuzda Get-dən başqa bir şey yoxdur. və ya əksinə.
+
+datanı Serializable necə edirik?
+1. implements Serializable interface (Marker interface)
+2. add serialVersionUID field
+private static final Long serialVersionUID = 1L;
+
+Redisdə datanı mütləq Serializable edib saxlayırıq, onda byte-lar şəklində saxlayır deyə yer az tutur. Sonra keşdən götürəndə isə DeSerialization edirik.
+
+bəs hansısa fieldi istəmirik serialize olsun. necə edək?
+private transient Integer age; - qabağına transient yazırıq
+
+transient nə zaman işləmir? static variable-də işləmir. çünki o field classa aiddir.
+
+Redisi koda qoşmaq üçün nə edirik?
+1. Dependency: implementation 'org.redisson:redisson:3.17.0'
+2. @Configuration classı

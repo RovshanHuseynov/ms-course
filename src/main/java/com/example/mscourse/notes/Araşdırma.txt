@@ -92,14 +92,14 @@ semafora nədir? mutex nədir?
 race condition nədir? hansı case-də yaşana bilər? nümunə gətir?
 double check locking nədir?
 java referances: soft, strong, weak and etc. use cases of them/ real implementation
-misal üçün javada yaratdığımız obyektlər strong referancesdir
+misal üçün javada yaratdığımız obyektlər strong referancesdir, digərləri enterprise app-larda çox istifadə olunmur
 Collection hierarcy oxu
-Map, Hashmap, TreeMap, LinkedHasmap, Identity Hashmap, Weak HashMap - temporary dataları burda store eləmək yaxşıdır. Çünki data ilə işimizi gördük artıq lazım deyil, datalar GC ilə silənən zaman avtomatik gedib o Weak HashMap-dan da onu siləcək (bizim applarda bu istifadə olunmur, əsasən oyunlarda filan lazım olur). Identity Hashmap isə key-ləri hashcode-a görə yox, reference-yə görə store edir.
+Map, Hashmap, TreeMap, LinkedHasmap, Identity Hashmap, Weak HashMap - temporary dataları burda store eləmək yaxşıdır. Çünki data ilə işimizi gördük artıq lazım deyil, datalar GC ilə silənən zaman avtomatik gedib o Weak HashMap-dan da onu siləcək (bizim enterprise applarda bu istifadə olunmur, əsasən oyunlarda filan lazım olur). Identity Hashmap isə key-ləri hashcode-a görə yox, reference-yə görə store edir.
 String s = "a";
 String s1 = new String("a");
 bunlar hər ikisi String pool-a gedir düşür, amma String poolda fərqli reference-də yadda saxlanılır. new yazdığımıza görə hərdəfə o təzə yaddaşda saxlanacaq, amma elə belə String s = "a", String s5 = "a", String s6 = "a"; yazsaq bunların hamısı eyni referancedə saxlanacaq
 indi biz bir Hashmap götürsək və hashMap.put(s); və hashMap.put(s1); etsək, onda bunlar 2 fərqli key kimi ora düşəcək. (ikisi də "a"-nı saxlamaqlarına baxmayaraq). amma identity hashMap-də bunlar eyni element kimi düşəcək, override olacaq.
-Interview question: Map və ya Set-də bilirik ki, key tərəf həmişə unique-dir. Necə edə bilərik ki, bunu pozaq? yəni Map və ya Key-ə eyni bir Stringi insert edək, ora 2 dəfə düşsün
+Interview question: Map və ya Set-də bilirik ki, key tərəf həmişə unique-dir. Necə edə bilərik ki, bunu pozaq? yəni Map və ya Key-ə eyni bir Stringi insert edək, ora 2 dəfə düşsün. cavab Identity Hashmap-da bunu edə bilərik. String s1 = new String("a"); String s2 = new String("a"); String s3 = new String("a"); sonra s1,s2,s3-ü Identity Hashmap-a put edə bilərik, amma hashcode-a yox reference-yə baxdığına görə hərdəfə başqa başqa bucket-lərə əlavə edəcək.
 niyə String class-ı immutabledir?
 runtime polimorphizim compile time polimorphizim nədir?
 dynamic binding static binding nədir?
@@ -121,8 +121,8 @@ proxy məsələsinə görə
 @Configuration class içərisində bean-lər yaratmışam, bu methodlar private ola bilər?
 proxy məsələsinə görə
 Springdə bir çox annotation proxy pattern əsasında işləyir. Spring özü arxanda 2 cür yolla (2 implementation) proxy yarada bilir:
-1. CGLIB - classı extends edib proxy edir. final classlarda CGLIB işləmir, çünki final classlarda extends keyword işləmir
-2. JDK Dynamic proxy - classı implements edib proxy edir
+1. CGLIB - bu extends mexanizmi ilə işləyir. classı extends edib proxy edir. final classlarda CGLIB işləmir, çünki final classlarda extends keyword işləmir
+2. JDK Dynamic proxy - bu isə implements mexanizmi ilə işləyir. classı implements edib proxy edir
 Transactional propogation
 for example I have a server, and my server accepts 100 requests per second. But my client sends me more than 100 requests per second and my server gets down. I cannot tell my client not to send more than 100 requests. How can I set limit for requests in my side? (araşdır rate limiting pattern)
 databasa indexləri hansı data structure ilə işləyir?
@@ -150,6 +150,8 @@ heap space error da adından göründüyü heap dolması deməkdir
 onda heap space error və OutOfMemoryError eyni şeylərdir? yoxsa fərqlidir? araşdır
 StackOverFlowException - Stack dolanda
 
+@PostConstruct and @PreDestroy annotations
+
 Garbage Collector
 1. Hansı hissələrə bölünür? young generation, old generation
 2. Obyektlər bu generationlarda necə irəliləyirlər? nə zaman hansı generationa keçir
@@ -158,14 +160,59 @@ Garbage Collector
 5. stop the world nə vaxt baş verir? qarşısını almaq olarmı?
 6. hansı GC-lər ümumiyyətlə var? serial, parallel, G1, CMS, hansı versiya JDK-da işlənirlər
 7. GC-ni biz özümüz çağıra bilinikmi? finalise method, deprecated olub, System.gc(); biz kodda yazanda garbage collector işə düşürmü?
-yox. System.gc(); yazanda garbage collectorun öz hesablamaları var ki, onu hesablayır, onun özünün bir delta-sı var əgər hesablamadakı rəqəm o deltaya uyğun gəlirsə işə düşür keçmirsə düşmür
+yox. System.gc(), Runtime.gc(), və ya finalise yazanda garbage collector 100% işə düşmür, ilk öncə onun öz hesablamaları var ki, onu hesablayır, onun özünün bir delta-sı var əgər hesablamadakı rəqəm o deltaya uyğun gəlirsə işə düşür keçmirsə düşmür
 yəni biz 100% qarantiya ilə gc-ni çağıra bilmərik. elə olsa infiniti for loop və ya while yazıb onun içində System.gc(); yazıb sistemi çökdürə bilərik
+
+young generation vs old generation
+ilk öncə bütün obyektlər olur young-da. əgər reference count-ing müəyyən rəqəmdən çox olursa həmin obyeytlər keçirlər old generation-a. Amma birbaşa young-dan da generation-a keçmir. Young-un içərisində from və to var. Birinci from-da olurlar, daha sonra from-dan to-ya miqrasiya olurlar. Sonra to-dan old-a keçirlər. həmçinin to boşalır deyə bu vaxt from-dakılar da to-ya keçir. Elə bil hamısı bir pillə sürüşür.
+sonra orda minor GC var və major GC var. Onları araşdır.
+Mark and sweep var. Defreqmantasiya var. Onları araşdır. Defreqmantasiya - sweep-dən sonra yaddaşda boş yerlər qalmış olur, GC sürüşdürmə ilə o boş yerləri doldurur. Yaddaşı kompaktlaşdırır.
 
 Multithreading
 1. threadləri neçə cür yarada bilərik? Thread, Runnable (functional interface with void method), Collable (functional interface with return future data type method)
 2. future nədir? bu future ilə Collable-dan cavab ala bilirik ki, misal üçün bu thread successful oldu yoxsa yox orda return var deyə baxıb sonra onun əsasında başqa bir iş görə bilərik
 3. Runnable biz implements də edə bilərik başqa cür nə edə bilərik? functional interface olduğuna görə onu lambda ilə də istifadə edə bilərik
 4. executor servislər nədir və növləri? thread pool-lardır, biz threadləri yaradıb bir pool-a yığırıq, sonra lazım olduqca istifadə edirik. single (poolda 1 ədəd thread yaradır, buna ehtiyac yoxdur çünki springdə @Async annotation var. yalnız o zaman istifadə edilər bilər ki bizdə void qaytaran method yox feature qaytaran method lazımdır), schedular (bu da çox istifadə olunmur çünki springdə scheduler var onsuzda), fixed (özün təyin edirsən ki poolda neçə ədəd thread yaransın)
-5. misal üçün bizdə bir biznes qaydası var ki, eyni anda 1 müştəri 1 ödəniş edə bilər birdən çox ödənişi eyni anda edə bilməz. bunun həlli monolitdə - mutex - 1 useri locklamaq üçün. (reentrant lock) - bir dənə threadi, bir dənə datanı locklayır, semafor nədir? - bir neçə mutex. misal üçün məbtəxdə 2 ədəd oturacaq var, və 5 nəfər adam girib yemək yemək istəyir. iki-iki locklayır, 1 nəfər yedi bitirdi 3-cü adamı buraxır, bu şəkildə. və ya bir API var sən istəyirsən bu API-a sorğular 3-3 getsin ondan semafor işlədə bilərik
-mutex və semafor mikroservisdə işləmir, monolitdə işləyir. səbəbi? podlar. mikroservisdə podlar çoxdur. podlar çox olanda mutex 1 podu locklasa da digər poddan sorğu gələ bilir. mikroservisdə locklama cache-ing ilə olur. misal üçün: redis locking araşdır
+5. misal üçün bizdə bir biznes qaydası var ki, eyni anda 1 müştəri 1 ödəniş edə bilər birdən çox ödənişi eyni anda edə bilməz. bunun həlli monolitdə - mutex - 1 useri locklamaq üçün. (re-entrant lock) - bir dənə threadi, bir dənə datanı locklayır, semafor (Semaphore) nədir? - bir neçə mutex. misal üçün məbtəxdə 2 ədəd oturacaq var, və 5 nəfər adam girib yemək yemək istəyir. iki-iki locklayır, 1 nəfər yedi bitirdi 3-cü adamı buraxır, bu şəkildə. və ya bir API var sən istəyirsən bu API-a sorğular 3-3 getsin ondan semafor işlədə bilərik
+ümumiyyətlə yalnız 1 thread işləsin, yəni synchronized məntiqi olsun bunun həlli monolitdə mutex-dir. Monolit appda Synchronized-in alternativi nədir sualı da verilə bilər? cavab: Mutex. Mutex locking məntiqi ilə işləyir, kod leveldə işləyir, databaza leveldə işləmir. Databaza leveldə lockamaq üçün isolation level serializable etmək olar.
+mutex və semafor (Semaphore) mikroservisdə işləmir, monolitdə işləyir. səbəbi? podlar. mikroservisdə podlar çoxdur. podlar çox olanda mutex 1 podu locklasa da digər poddan sorğu gələ bilir. mikroservisdə locklama cache-ing ilə olur. misal üçün: redis locking araşdır
 semafor həmçinin monolitdə bir növ müəyyən qədər access vermək məntiqi işlər üçün də istifadə olunur. misal üçün bir API var biz ora istəyirikki sorğular 3-3 getsin. ona semafor işlədə bilərik
+
+Mutex, Semaphore, Race Condition, Concurrency, Multithreading barədə araşdır
+
+high throughput application vs Low latency application
+Low latency application - a lot of get requests. get requests are ususally more than insert requests (for example twitter, facebook posts)
+high throughput application - a lot of insert requests. insert requests are ususally more than get request (for example google drive, dropbox, we-transfer. ususally storing websites)
+both - you have both tons of get and tons of insert requests. (for example youtube). It is of course very difficult to handle and optimize
+
+compile time polymorphizim vs runtime polymorphizim araşdır.
+Misal üçün runtime polimorphizim nümunələri:
+1. generics-də sən T yazanda və tutaqkı ora parametr olaraq Student gördərəndə yalnız və yalnız kod run olanda həmin T-ni Studentə cast edir.
+2. və ya harasa Object yazanda o deməkdirki sən ora Integer də ötürə bilərsən, String də ötürə bilərsən, Student də ötürə bilərsən, nə ötürürsənsə ötür kod run olunanda həmin Object tipi sənin ötürdüyün tipə cast olunur.
+
+Comparator vs Comparable
+
+circuit breaker - rubilnik. bütün servisləri söndürmək - yandırmaq. bütün sorğuları söndürür ki, gəlməsin.
+
+databazada index növlərini araşdır. Index loru dildə izah eləsək kitabxana məntiqi ilə işləyir. A-ları bir yığır, B-ləri bir yığır və s. Hamı təkcə Btree-ni bilir. Misal üçün timestamp-da Btree ideal getmir.
+Asixron index nə zaman istifadə edə bilərsən? nümunə çək. cavab: böyük bir cədvəldə (25 milyon sətir) hansısa bir sütuna index qoymaq istəsək. Cədvəli locklamasın deyə.
+
+view ilə matview fərq? - view hərdəfə gedir əsas selectin özünü işə salır. 10 dəfə də view çağırsaq 10 dəfə də gedib arxada əsas selectimiz (joinlər filan olar) çağıracaq və gec işləyəcək. belə çıxır ki view əslində qeyri adı bir iş görmür sadəcə datanı kompakt şəkildə kiməsə vermək üçün view istifadə edə bilərik və ya əsas cədvəllərin adlarını, sütun adlarını gizlətmək üçün. beləliklə view yalnız bizim large datanı kompakt hala gətirmək üçün istifadə edilir.
+matview isə bir dəfə o əsas selecti çağırır və nəticəni özündə saxlamış olur biz matview-dan select çəkəndə artıq bir növ existed cədvələndən select çəkmiş kimi oluruq yəni əsas select joinlər filan çağırılmır deyə tez işləyir. Üstəgəl matview-nu gündə 1 dəfə update edib yeri dataları da o existed cədvələ gətirmək olur (refresh)
+trigger - event based - action based işə düşən bir əməliyyat
+mikroservislərdə GET sorğularını databaza tərəfdə əgər bir neçə cədvəldə select çəkirsə
+üsul 1: bunu view məntiqi ilə qura bilərik. bir view yaradırıq adı misal üçün olsun Aview. Aview-nun entity classını yaradırıq, classın başında table("Aview") qoyuruq, sonra adi findBy methodları ilə datanı çəkirik, hətta ora pagination, filtering, sorting nə isətək qoşmaq olar.
+üsul 2: pl prosedure yarada bilərik selectlərimizi həmin prosedurun içərisinə yaza bilərik, prosedure-a da ad verib həmin adı kodda çağıra bilərik.
+POST/PUT sorğuları - yəni databazada update-ləri isə
+jdbc işlədirikse heç vaxt jdbc-də açıq olaraq update set amount = 100 where user_id = 10; yazmağa icazə verilməyəcək core bankingdə. onda siz öz balansınızı 1 milyon manat artıra bilərsiniz. Bir POST sorğuları eləməyin yolu - pl prosedure. prosedure yazırıq, update-ləri yığırıq onun içinə, və kodda həmin prosedure-u adı ilə çağırırıq.
+
+
+Blocking Context
+1. hər podda (Tomcatda) default olaraq 200 thread olur. Yəni eyni anda paralel olaraq maksimum 200 thread işləyə bilər 1 podda
+2. 10 pod varsa 2000 thread edir
+3. amma unutmaq olmaq ki, podlarımızın sayını artıra bilərik, amma bütün podlar vahid 1 databaza ilə işləyir və databaza Hikari ilə eyni anda default 20 (connection pool size) sorğu qəbul edir. Yəni biz threadlərdə 3 ədəd podumuz var 600 paralel sorğumuz var, amma databaza yalnız eyni anda onların 20-sini icra edə bilir. Digər sorğular adi kassir növbəsi kimi gözləmədə qalacaq yaxşı halda gec cavab vermiş olacayıq, pis halda isə Timeout xətası verəcək yəni cavab emal edə bilməyəcəyik. Belə hallarda biz databazaya kömək etməliyik. Yəni keş istifadə etməliyik. və ya queue qoşub bu dəqiqə vacib olmayan sorğuları load-un az olan vaxtlarına keçirməliyik və s
+
+Əgər Redis və Queue istifadə edə bilmiriksə, onda bu çox sayda sorğunu başqa bu necə əhəll etməliyik. Bu halda artıq Blocking Context-in limitlərini aşmış oluruq, keçməliyik Non-Blocking context-ə. Bu isə Reactive Programming və ya təzə çıxan Virtual Threads (Java 21-də gəlib. Yəni bunu istifadə edə bilməyimiz üçün layihəni Java 21-ə keçirməliyik. Virtual Threads əslində Non-Blocking context getmir elə Blocking Context gedir. Virtual Thread ilə biz Blocking Context-də Non-Blocking kod yaza bilirik. Çünki normalda thread açmaq bağlamaq Javada çox ağrılı-ağır bir iş idi, virtual threadlər amma çox yüngüldür çox asanlıqla bunu açıb-bağlama bilirik)
+Reactive Programming - bu niyə sürətli işləyir? çünki threadi axıra kimi izləmir. Thread-ləri busy-də saxlamır. Threadi tez buraxır. Ona görə sürətli işləyir ki, təzə thread-ləri qəbul edə bilir. Bəs sual yarana bilər ki, necə bilir ki, bu thread uğurlu oldu yoxsa yox? onu artıq bilmək üçün Reactive Programming arxada necə işləyir onu başa düşmək lazımdır. Reactive Programming özü observer design patternə uyğun işləyir. Yəni orda olurdu publisher və subscriber. Thread özü əvvəlcədən publisherə subscribe olur deyə thread bitəndə publicherin xəbəri olur ki hansısa subscriberin threadi bitdi.
+Reactive Programming mənfi cəhəti nədir?
+Transaksiyaları idarə etmək çətindir. Qırılanları bərpa etmək, Exception handling etmək bunlar hamısı çətindir. Ammə gərək bizim hansısa bir domain-servisimiz var ki, orda @Transactional istifadə olunmur, o tip domainlərdə Reactive əladır. Misal üçün notification servisi.

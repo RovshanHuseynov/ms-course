@@ -43,7 +43,7 @@ v1/users GET   - burda gec işləməsin deyə pagination və ya filtering aparı
 Path Variable-da adətən id-lər olur, başqa şeylər olmur. url-də additional və ya optional parametr varsa o parametrləri Path Variable kimi ötürə bilmərik Request Param kimi ötürməliyik
 v1/users?page=0&count=10&status=ACTIVE  GET ? ----> request param (query param)
 GET-də request body göndərmək mümkündür amma bad practise sayılır. mümkün qədər request param işlətməliyik
-yegəanə olaraq 1 halda bir request param işlədə bilmirik, məcburuq request body işlədək, o hal da ki url-in uzunluğu maksimum 2048 simvol ola bilər, (max url size = 2048 characters) əgər bizim request param-ın 2048 simvolda çox olma ehtimalı varsa onda request body işlətməyə məcburuq. Bu hal da adətən request paramda LIST göndərmək istəyəndə baş verə bilər.
+yeganə olaraq 1 halda bir request param işlədə bilmirik, məcburuq request body işlədək, o hal da ki url-in uzunluğu maksimum 2048 simvol ola bilər, (max url size = 2048 characters) əgər bizim request param-ın 2048 simvolda çox olma ehtimalı varsa onda request body işlətməyə məcburuq. Bu hal da adətən request paramda LIST göndərmək istəyəndə baş verə bilər.
 request param list example - v1/payments?transactionIds=123344&transactionIds=12121231&transactionIds=131231231
 əgər url-də 2048 simvolu aşsaq bizim requestimizə cavab olacaraq 413 reqsonse kodu qayıdacaq
 v1/users/1 {"name" : "John"} PUT - update all fields
@@ -56,8 +56,15 @@ URL-də bir neçə söz olanda camelCase, snake_case qoymaq olmaz!!! kabab-case 
 misal üçün: /v1/cardSalary olmaz!!!
             /v1/card_Salary olmaz!!!
 			/v1/card-salary olar
-			
-			
+
+
+kodda methodda heç bir annatation istifadə etməmişiksə onda default olaraq @RequestParam kimi başa düşür.
+public void save(PaymentRequest request){
+    paymentService.save(request);
+}
+burda PaymentRequest request java tərəfindən @RequestParam kimi başa düşülür. amma bu heç nə yazmamışıq inputu dolu və ya boş göndərmək optional olur, yəni  default required=false-dur, yəni input null ola bilər. amma required=true olsa idi request mütləq dolu olmalı idi. Ya da classın özü yox, içindəki bir field mandatory olsun istəyiriksə, həmin fieldin başına @NotNull və onun alternativlərini yaza bilərik.
+paginationda hazırladığımız kriteriyaları findAll() methoduna ötürürük. Əslində sadədir kriteriyalarda sadəcə scriptimizi formalaşdırırıq, inputda nə verilibsə həmin fieldlərə görə select scriptimizi yazırıq və həmin sciripti findAll() methoduna ötürürük ordan qayıdan cavabı da istifadəçisə qaytarırıq.
+
 HTTP methods safe or idempotent
 idempotent-lik odurki, hər eyni request üçün həmişə eyni response gəlir. daha dəqiq desək eyni request həmişə eyni işi görür. və eyni işi gördüyünə görə yəni biz o requesti 1 dəfə çağıranda istədiyimiz nəticəni almış oluruq, 10 dəfə çağırsaq belə elə o ilk nəticənin eynisi gələcək
 all safe methods are also idempotent, but not all idempotent methods are not safe
@@ -93,7 +100,7 @@ Redirection messages (300 – 399)
 307 - TEMPORARY REDIRECT
 Client error responses (400 – 499)
 400 - BAD REQUEST. validation issues
-401 - UNAUTHORIZED. authentication xətası. misal üçün: token düz gəlməyəndə. token vaxtı bitib, sessiya vaxt bitib. authentication problems. user şifrəsini səhv yazıbsa
+401 - UNAUTHORIZED. authentication xətası. misal üçün: token düz gəlməyəndə. token vaxtı bitib, sessiya vaxt bitib. authorization problems. permission yoxdursa.
 402 - PAYMENT REQUIRED. ödənişin vaxtı bitibsə
 403 - FORBIDDEN. authorization problems. permission problems. access problems
 404 - NOT FOUND. url səhv olanda. user yoxdursa. yəni nəsə tapılmadısa

@@ -1,0 +1,33 @@
+authentication and authorization 
+
+authentication - log in (username and password)
+authorization - right access or permissions
+
+Tokendə payload-da nə saxlanılır, nə saxlanılmır?
+1. sensitive data saxlanılmır. çünki bunun payload-ı publicdir hamı açıb onu görəcək
+2. adətən id-lər saxlanılır. id sensitive data hesab olunmur. tutaqki sənin id-ni bilirlər heç nə edə bilməyəcəklər. role-ları saxlaya bilərlər.
+
+JWT (JSON Web Token) token 3 hissədən ibarət olur
+1. header
+2. payload
+3. signature
+
+Appda nə tip token istifadə olunur?
+Access Token vs Refresh Token
+1. Access Token - qısa müddətli tokenlərdir. systemə log-in olanda verilir. Adətən 10-30 dəqiqəlik verilir (Ortalama 15 dəqiqəlik olur). Systemə giriş üçün istifadə olunur. Bir növ visit kart kimi. Niyə qısa müddətlidir? əgər kimsə bunu ələ keçirsə (hack) maksimum 30 dəqiqəlik əlçatan olsun, ondan sonra sistemdən tullasın. (Access token yarananda elə Refresh token də yaranmış olur)
+2. Refresh Token - Access Token müddəti bitdikdə tokenləri yeniləmə prosesi. Yalnız Access tokenin vaxtı bitəndə onu yeniləmək üçün istifadə olunur. Refresh Token uzunmüddətli olur. Ən azı 3 saatdan başlayır 1 həftəyə qədər ola bilər (Ortalama 1 gün olur). Əgər Refresh token olmasa idi Access tokenin vaxtı bitən kimi useri tullayacaydı çölə. Bu token həm Access tokeni, həm də Refresh tokeni yeniləyir.
+Deyək ki, Access token 30 dəqiqəlik idi. 30 dəqiqə sonra front sorğunu göndərəndə backdan cavab alır ki Access tokenin vaxtı bitib. Onda front back-a Refresh tokeni göndərir ki, tokenləri yeniləsin və back-end həmin sorğuya cavab olaraq həm Access tokeni, həm də Refresh tokeni yeniləyib yenilərini fronta cavab olaraq ötürür. Bu prosesləri istifadəçi hiss eləmir.
+Bütün sorğularda front back-i access token ilə çağırır. Ta ki, access token vaxtı bitibsə digər API-ya (refreshToken() method) bu dəfə refresh token vasitəsilə sorğu atır və cavabında 2 ədəd yeni token alır. Beləliklə refresh token yeganə olaraq access token vaxtı bitəndə onu yeniləmək üçün istifadə edilir. Access Token isə bütün digər API-ları çağıran zaman istifadə edilir. Yəni network-da biz həmişə access tokeni götürük. Hack eləyən adam da Access-i işlədəcək, amma Access tokenin vaxtı bitəndə onu yeniləyə bilməyəcək, çünki yeniləmək üçün Refresh token lazım idi və hack edən adam bunu bilmir. Beləliklə biz yalnız 1 tokenlə də (yalnız Access tokenlə) işləyə bilərdik, amma bu Access tokeni ələ keçirən adam bizdə həmişə sistemdə qalacaqdı. Refresh token sırf təhlükəsizliyi artırmaq üçün istifadə olunan bir üsuldur. Hətta tokeni yeniləyən zaman response hissədə təzə token veririk axı (həm təzə Access token, həm də təzə Refresh token), beləliklə nəticə etibarilə tam secure proses olmur, hacker Refresh tokeni də network-də response hissədən götürə bilər. Ona görə bu refreshToken məntiqini HTTP Request-Http Response üzərindən yox cookie-lər ilə edirlər. Frontda bunu cookie ilə ötürürlər, Http response ilə yox.
+
+log-in zamanı bizdə token olmur. biz log-in olanda bizə həm Access token, həm də Refresh token verilir. İndidən sonra isə sorğularımızı artıq bu iki tokenlə etmiş oluruq. Ümumiyyətlə istənilən applicationu-da UI ilə backend arasında API Gateway olur. Yəni frontla back-end birbaşa bir biri ilə danışmır. Ortada API Gateway tool-lar olur misal üçün NGINX. UI sorğuları API Gateway-a (yəni NGINX-ə) göndərir. NGINX isə backend-ə göndərir.
+NGINX - ms-auth-a sorğu göndərir header-də token göndərir. ms-auth baxır hər şey normaldırsa token düzdürsə və vaxtı bitməyibsə, cavab olaraq NGINX-ə userId və ROLE göndərir. NGINX bu məlumatı götürüb bu dəfə digər ms-ləri çağırır. bizə hansı ms lazımdırsa ora. misal üçün ms-card-a. ms-card-ı çağırır userId və ROLE ilə. yəni uzun sözün qısası ms-card-da heç bir security kodu olmur, bütün security kodları ms-auth-da olur.
+
+SRP protocol araşdır. log-in zamanı password-u hashlamaq üçün. Həm front, həm də backend bunu özündə implement etməlidir. Bu protocol-da sistemə login edəndə password hash-lanib back-a göndərilir. Inspect elementdə network-da baxanda password-u görəcəksiniz hash-lanib. Network-da man in the middle olsa belə bizim password-ı görə bilməyəcək. hash-layanda salt əlavə edirsən. salt-ı özün bilirsən deyə onu bilməyən adam sənin hash üsulunu tapsa belə datanı decode edə bilmir.
+
+belə bir deyim var ki, deyirlər password String kimi yox char[] kimi saxla guya daha təhlükəsiz olacaq. Deyirlər guya String-lər heap-də string pooldadır deyə bir müddət reference-si string poolda qalır, girib o məlumatı görə bilərlər, amma biz char[] işlətsək, işimiz bitəndən sonra arrayi təmizləyə bilərik ki, daha secure olsun. Amma bu boş şeydir. Bir adam gəlib bizim heap-mizə kimi daxil olubsa istənilən məlumatı götürə bilər.
+
+Tokenləri Keşləmək lazımdırmı? - 100% bəli. gec-gec yenilənən və tez-tez access olunan (get) dataları keşləməliyik.
+
+JWT token üçün koda bu dependency-ni əlavə edirik: implementation 'com.nimbusds:nimbus-jose-jwt:9.15.2'
+
+@PreAuthorize - bu annotation ilə biz sorğunun gəldiyi tokeninmi, userId-ninmi permissionlanın yoxlaya-check edə bilərik ki, ümumiyyətlə bu sorğunu göndərmək üçün icazəsi varmı.

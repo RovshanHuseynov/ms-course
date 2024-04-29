@@ -1,26 +1,35 @@
 Queue nə zaman istifadə olunur?
 1. Asynchronous proseslərdə
-2. Çox böyük load applarda. Load yaymaq üçün. Əgər load çoxdursa və çatdırmırıqsa, sorğusun Queue-ya yazıb, sonra Queue-dən batch-larla 1000-1000 götürüb icra etmək
-RabbitMQ istifadə etmək üçün docker-də RabbitMQ yüklə run elə
+2. Çox böyük load applarda. Load yaymaq üçün. Əgər load çoxdursa və çatdırmırıqsa, sorğunu  Queue-ya yazıb, sonra Queue-dən batch-larla 1000-1000 götürüb icra etmək
 
-RabbitMQ - saniyədə 40 min message - sadə message queue lazımdırsa bunu işlət. bunun infrasukturu və supportu asandırş RabbitMQ sıra ilə işləyir. Yəni birinci göndərilən message birinci email olunur. Tutaq ki, ƏDV geri alda eyni çeki 5 adam portala daxil etsə onda ilk daxil edənin adına yazılacaq həmin çek, digər adamlar xəta alacaq
-Kafka - saniyədə 1 milyon. high load applarda bunu işlət. Kafkada var: topic, replica, broker
+RabbitMQ - saniyədə 40 min message - sadə message queue lazımdırsa bunu işlət. bunun infrasukturu və supportu asandır. RabbitMQ sıra ilə işləyir. Yəni birinci göndərilən message birinci email olunur. Tutaq ki, ƏDV geri alda eyni çeki 5 adam portala daxil etsə onda ilk daxil edənin adına yazılacaq həmin çek, digər adamlar xəta alacaq
+Kafka - saniyədə 1 milyon. high load applarda bunu işlət. Kafkada var: topic, partition, group, group_id, replica, broker. Kafkada consumer tərəfdə data itkisinin qabağını almaq üçün: acknowledgement=true
 
 Redis - caching üçün istifadə edilir
-RabbitMQ - isə asinxron üçün
-əgər layihəni asinxron-a keçirə bilmirsənsə yəni müştəri tərəfdən biznes tərəfdən nazarılıq varsa və layihə də sinxronda çox gec işləyirsə onda reactive programming araşdır bununla layihəsi sinxron saxlamaq şərti ilə sürətləndirə bilərsən
+RabbitMQ - isə sorğuların asinxron icrası üçün
+əgər layihəni asinxron-a keçirə bilmirsənsə yəni müştəri tərəfdən biznes tərəfdən nazarılıq varsa və layihə də sinxronda çox gec işləyirsə onda reactive programming araşdır bununla layihəsi sinxron saxlamaq şərti ilə sürətləndirə bilərsən. (və ya Java21-də artıq Virtual Threadlər çıxıb onu istifadə edə bilərik)
 
-AMQP protokolu ilə işləyir
-producer (sender) və consumer (listener). göndərdiyimiz message birbaşa queue-yə düşmür. senderin göndərdiyi message birinci exchange bölməsinə düşür. exchange burda bir növ beyin rolunu oynayır. koddakı controller rolunu oynayır. baxır message-ni hansı queue-yə lazımdırsa ora göndərir. ola bilər bir neçə queue-yə göndərir. bəs nəyin əsasında bilir? binding (roots???) əsasında. key-lərdir id-lər. exchange bu binding-lərə baxır, həmin key-lərin də əvvəllədən qabağında value olaraq queue name(s) saxlayırıq ki bu key göndərdə bu queue(lərə)-ə göndər. consumer (listener) isə baxır queue-yə gələn message-ləri listen edib icra edir.
+RabbitMQ R-lang (functional) proqramlaşdırma dilində yazılıb. CloudAMQP protokolu ilə işləyir
+RabbitMQ bu qayda ilə işləyir. producer (sender) - mesajı queue-yə qoyan-yerləşdirən tərəf və consumer (listener) isə mesaja qulaq asan tərəf, mesajı queue-dən götürüb icra edən tərəf. göndərdiyimiz message birbaşa queue-yə düşmür. senderin göndərdiyi message birinci exchange bölməsinə düşür. exchange burda bir növ beyin (kordinator) rolunu oynayır. koddakı controller rolunu oynayır. baxır message-ni hansı queue-yə lazımdırsa ora göndərir-yerləşdirir. ola bilər bir neçə queue-yə göndərir. bəs nəyin əsasında bilir? binding (routes) əsasında. binding özü key (key burda queue-in adı) və value-lərdir (value isə həmin adda queue-yə göndərilən message), yəni map kimi, key əsasında bilir ki, həmin value-nu filan addakı queue-yə yerləşdirmək lazımdır, exchange bu binding-lərə baxır, həmin key-lərin də əvvəlcədən qabağında value olaraq queue name(s) saxlayırıq ki, bu key görəndə bu queue(lərə)-ə göndər. consumer (listener) isə baxır queue-yə gələn message-ləri listen edib icra edir.
+
+RabbitMQ qoşmaq üçün
+0. RabbitMQ istifadə etmək üçün docker-də RabbitMQ yüklə run elə
+1. dependency: implementation 'org.springframework.boot:spring-boot-starter-amqp'
+2. @Configuration class
+3. application.yml add rabbitmq lines
+
 microservis arxitekturasında bir ms sender rolunu oynayır, digər bir ms isə listener olur.
-queue hansı tərəfdə yaradılmalıdır? senderdə yoxsa listenerdə? cavab listenerdə. çünki sender sayı çox ola bilər, listener 1 ədəd olur
-DLQ - dead letter queue - message-lər listenerdə icra edilməyə başladısa artıq queue-dən silinir. bəs indi deyək ki, icra edilən zaman kodda xəta verdi exception çıxdı, message-də queue-dən silinib. demək bizim message-mız icra edilməmiş qaldı. Onda DLQ bizim köməyimizə çatır. yəni exception çıxanda message-lər itməsin deyə DLQ işlədirik. queue-dəki message-lar nə vaxt icra edilə bilmirsə exception verirsə onda onlar düşür DLQ-yə sonra biz özümüz burda yığılan message-ləri istədiyimiz nəsə edə bilərik. ya yenidən icra edə bilərik ya sadəcə baxıb araşdıra bilərik ki niyə exception verib və s
-DLQ-yə nə vaxt düşür? interview question. Yanlız RunTimeException-lar DLQ-ə düşür
-DLQ-yə düşməmişdən qabaq listener retry da qoşa bilərik ki, tutaq ki, 3 dəfə retry elə yenə də exception çıxırsa ondan sonra DLQ-ə əlavə elə
-və ya DLQ-ə ümumiyyət istəyirik ki, düşməsin try catch-in catch hissəsində throw yazmırıq. ya boş qoyuruq, ya da log.error yazırb loglayırıq
-listenerdə və senderdə heç bir biznes məntiq yazmırıq. listener sender sadəcə servis classlarının hansısa methodunu çağırır
-Rabbit özü default olaraq 5672 portunda ayağa qalxır. Rabbit admin panel isə 15672. yəni localhost:15672/#/exchanges yazırıq
+queue hansı tərəfdə yaradılmalıdır? senderdə yoxsa listenerdə? cavab listenerdə. çünki sender sayı çox ola bilər, listener 1 ədəd olur. Yəni misal üçün mail-queue adında queue yaratmaq istəyirik, 10 dənə senderimiz var, 10 dəfə queue yaransın? əlbəttə ki yox. mail-queue listener tərəfdə yaranmalıdır.
 
-internal caching - L1, L2
-external caching - Redis (default port 6379). Redis key-value məntiqi ilə işləyir. özü NoSQL databazadır
-cache nə zaman istifadə oluna bilər? Misal üçün bizim sorğumuz pulludursa. Misal üçün Asana sorğu gedir və ya kredit bürosuna sorğu gedir. Eyni müştəri üçün eyni servisi gündə  10 dəfə çağırmağın mənası qalmır, boşuna pul yazır. Ondansa ilk sorğunu həqiqətən də third-party-yə göndərib, sonrakıları cache-dən gətirmək olar.
+DLQ - dead letter queue - icra edilən zaman xəta almış mesajları yükləyir özünə və sonra bizim məntiqimizə əsasən onları nəsə edir. message-lər listenerdə icra edilməyə başladısa artıq queue-dən silinir. bəs indi deyək ki, icra edilən zaman kodda xəta verdi exception çıxdı, message-də queue-dən silinib. demək bizim message-mız icra edilməmiş qaldı. Onda DLQ bizim köməyimizə çatır. yəni exception çıxanda message-lər itməsin deyə DLQ işlədirik. queue-dəki message-lar nə vaxt icra edilə bilmirsə exception verirsə onda onlar düşür DLQ-yə sonra biz özümüz burda yığılan message-ləri istədiyimiz nəsə edə bilərik. ya yenidən icra edə bilərik ya sadəcə baxıb araşdıra bilərik ki niyə exception verib və s. try-catch yazıb xəta alanları retry edə bilərik, tutaqki 5 saniyə intervalla 5 dəfə, hələ də xəta verirsə, sonra dead-letter-queue-yə yerləşdirə bilərik.
+
+DLQ-yə nə vaxt düşür? interview question. Yanlız RunTimeException-lar DLQ-ə düşür. Yəni queue-dəki mesaj listener tərəfdə icra edilən zaman əgər RunTimeException çıxırsa onda DLQ-ə düşür.
+DLQ-yə düşməmişdən qabaq listener tərəfə retry da qoşa bilərik ki, tutaq ki, 3 dəfə retry elə yenə də exception çıxırsa ondan sonra DLQ-ə əlavə elə
+və ya DLQ-ə ümumiyyətlə istəyirik ki, düşməsin try catch-in catch hissəsində throw yazmırıq. ya boş qoyuruq, ya da log.error yazırb loglayırıq
+listenerdə və senderdə heç bir biznes məntiq yazmırıq. listener sender sadəcə servis classlarının hansısa methodunu çağırır
+Rabbit özü default olaraq 5672 portunda ayağa qalxır. Rabbit admin panel isə 15672 portunda. yəni localhost:15672/#/exchanges yazırıq
+
+1. listener və senderdə heç bir biznes məntiq yazmırıq. biznes məntiqlər servis classlarda qalır. kodun rahat genişlənməyi üçün
+2. dead-letter-queue bizə mesajlarımızın itməməsi üçün lazımdır
+3. əgər dead-letter-queue-ə düşməmişdən qabaq yenidən yoxlasın istəyiriksə onda retry qoşuruq
+4. dead-letter-queue-yə düşsün istəyiriksə bizə yalnız RunTimeException lazımdır
