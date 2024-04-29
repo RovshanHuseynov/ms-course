@@ -75,15 +75,19 @@ Sprində proxy ilə işləyən hansı annotation-ları tanıyırsız? məşhurla
 @Transactional
 @Async
 @Cachable
-AOP modulu
+AOP modulu (AOP modolundakı bütün annotationlar. nümunə: @Before, @After, @Around)
 Hibernate
+
+Proxy patter nə zaman ümumiyyətlə yazmaq olmur yəni compile xətası verir? və ya nə zaman yazsan belə işləmir?
+1. private methodlarda, final classlarda ümumiyyətlə kod compile olmur. çünki proxy-nin işləyə bilməsi üçün başqa bir class yaratmalıdır və bizim classı extends etməlidir. final classı extends etmək olmur və həmçinin private methodu başqa bir classda çağırmaq olmur. ona görə kod compile olmur
+2. əgər methodumuz başqa bir beandən (classdan) çağırılmırsa onda kod compile olunacaq, amma proxy-min işləməyəcək. proxy yalnız başqa bir classdan çağırıldığı zaman işləyir
 
 
 Behavioral design patterns
 
 1. Iterator - bu design pattern vasitəsilə biz data structurlarda elementlərin arasında irəliləyə bilirik. istənilən collection iterator istifadə edir, çünki iterable interface-dən gəlir. iterable interface-də foreach mehtodu var, next var, previous var, hasNext var
 
-2. Chain of Responsibility - bir biri ilə related olan - əlaqəli olan işləri görmək üçün. Misal üçün: şərt1 varsa, şərt2-ni elə. şərt2 varsa şərt3-ü elə. burda hətta elə chain ola bilər ki, o bir iş görməmiş belə digərinə ötürə bilər. misal üçün if ilə nəyisə yoxlayar o if düz gəlmir deyə öz işini görməz və chain-in növbəti elementini yoxlayar. Belə çıxır ki, burda hər chain-də if(null) şərtini yoxlamaq lazımdır. Amma chain heç vaxt qırılmır, həmişə eyni olur. Misal üçün A chain ötürür B chainə, o da ötürür C chainə. İndi elə bir hal ola bilər ki, B chain iş görməyəcək, amma bu o demək deyilki A chain birbaşa C chain çağıracaq, ardıcıllıq olduğu kimi qalacaq, sadəcə B görəcək bunluq iş yoxdur, heç bir iş görmədən C chainə ötürəcək 
+2. Chain of Responsibility - bir biri ilə related olan - əlaqəli olan işləri görmək üçün. Misal üçün: şərt1 varsa, şərt2-ni elə. şərt2 varsa şərt3-ü elə. burda hətta elə chain ola bilər ki, o bir iş görməmiş belə digərinə ötürə bilər. misal üçün if ilə nəyisə yoxlayar o if düz gəlmir deyə öz işini görməz və chain-in növbəti elementini yoxlayar. Belə çıxır ki, burda hər chain-də if(null) şərtini yoxlamaq lazımdır. Amma chain heç vaxt qırılmır, həmişə eyni olur. Misal üçün A chain ötürür B chainə, o da ötürür C chainə. İndi elə bir hal ola bilər ki, B chain iş görməyəcək, amma bu o demək deyilki A chain birbaşa C chain çağıracaq, ardıcıllıq olduğu kimi qalacaq, sadəcə B görəcək bunluq iş yoxdur, heç bir iş görmədən C chainə ötürəcək
 
 3. Observer - daha çox hansısa framework-lərdə istifadə olunur. pubsub (publisher subscriber) mexanizmində (redis-də və ya kafka-da istifadə edilir) həmin bu observer design pattern istifadə edilir. Real dünyada misal üçün: youtube və ya instagram. 1 publisher olur və onun çoxlu subscriber-ləri olur. Publisher nəsə edəndə, dəyişəndə subscriber-lərin xəbəri olur. Misal üçün: biz redis-lə listener qoya bilərik ki, amerikaya biletin qiyməti nə vaxt dəyişsə (və ya nə vaxt 1000$-dan aşağı düşsə) mənə notification-email göndər. Burda subscriber-lərə notification göndərmiş oluruq.
 
